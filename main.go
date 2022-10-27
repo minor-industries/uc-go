@@ -31,46 +31,39 @@ func main() {
 		Length:     5.0,
 	})})
 
-	i := 0
+	tick := 30 * time.Millisecond
+	frames := 0
+
 	t0 := time.Now()
 
-	for {
-		now := time.Now()
-		dt := now.Sub(t0)
+	for range time.NewTicker(tick).C {
+		//now := time.Now()
+		//ts := now.Unix() / int64(time.Second)
+		led.Set(!led.Get())
+
 		sim.Tick(
-			float64(now.UnixMicro()/1e6),
-			dt.Seconds(),
+			0,
+			tick.Seconds(),
 		)
 
-		writeColors(neo, colors, i)
+		writeColors(neo, colors)
+		frames++
 
-		led.Low()
-		time.Sleep(time.Millisecond * 500)
-
-		led.High()
-		time.Sleep(time.Millisecond * 500)
-
-		i++
-		i %= ledNum
+		if frames%100 == 0 {
+			now := time.Now()
+			dt := now.Sub(t0)
+			fmt.Println(frames, dt, float64(frames)/dt.Seconds(), "\r")
+		}
 	}
 }
 
-func writeColors(neo ws2812.Device, colors []color.RGBA, blank int) {
+func writeColors(neo ws2812.Device, colors []color.RGBA) {
 	for i := range colors {
-		if i == blank {
-			colors[i] = color.RGBA{
-				R: 1,
-				G: 0,
-				B: 0,
-				A: 255,
-			}
-		} else {
-			colors[i] = color.RGBA{
-				R: 32,
-				G: 0,
-				B: 0,
-				A: 255,
-			}
+		colors[i] = color.RGBA{
+			R: 32,
+			G: 0,
+			B: 0,
+			A: 255,
 		}
 	}
 
