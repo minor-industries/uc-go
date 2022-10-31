@@ -13,23 +13,23 @@ import (
 
 const (
 	ledPin      = machine.GP0 // NeoPixels pin
-	ledNum      = 13          // number of NeoPixels
+	ledNum      = 150         // number of NeoPixels
 	ledMaxLevel = 0.5         // brightness level of NeoPxels (0~1)
 )
 
 func main() {
 	ledPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	neo := ws2812.New(ledPin)
-	colors := make([]color.RGBA, ledNum)
 
 	led := machine.LED
 	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
-	sim := bounce.Bounce(&bounce.App{Strip: strip.NewStrip(&cfg.Cfg{
+	strip := strip.NewStrip(&cfg.Cfg{
 		NumLeds:    150,
 		StartIndex: 0,
 		Length:     5.0,
-	})})
+	})
+	sim := bounce.Bounce(&bounce.App{Strip: strip})
 
 	tick := 30 * time.Millisecond
 	frames := 0
@@ -46,7 +46,7 @@ func main() {
 			tick.Seconds(),
 		)
 
-		writeColors(neo, colors)
+		writeColors(neo, strip)
 		frames++
 
 		if frames%100 == 0 {
@@ -57,17 +57,28 @@ func main() {
 	}
 }
 
-func writeColors(neo ws2812.Device, colors []color.RGBA) {
-	for i := range colors {
-		colors[i] = color.RGBA{
-			R: 32,
-			G: 0,
-			B: 0,
-			A: 255,
-		}
+func clamp(min, x, max float64) float64 {
+	if x < min {
+		return min
 	}
 
-	err := neo.WriteColors(colors)
+	if x > max {
+		return max
+	}
+
+	return x
+}
+
+func writeColors(neo ws2812.Device, st *strip.Strip) {
+	var colors [ledNum]color.RGBA
+
+	st.Each(func(i int, led *strip.Led) {
+		colors[i].R = uint8(clamp(0, led.R, 1.0) * ledMaxLevel * 255.0)
+		colors[i].G = uint8(clamp(0, led.G, 1.0) * ledMaxLevel * 255.0)
+		colors[i].B = uint8(clamp(0, led.B, 1.0) * ledMaxLevel * 255.0)
+	})
+
+	err := neo.WriteColors(colors[:])
 	if err != nil {
 		fmt.Println("err: %s", err.Error())
 	}
