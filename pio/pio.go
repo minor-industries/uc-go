@@ -1,5 +1,7 @@
 //go:build rp2040
 
+// from https://github.com/tinygo-org/tinygo/pull/1983/files
+
 package pio
 
 import (

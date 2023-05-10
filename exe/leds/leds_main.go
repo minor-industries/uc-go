@@ -39,7 +39,7 @@ func Main() {
 	for range time.NewTicker(tick).C {
 		//now := time.Now()
 		//ts := now.Unix() / int64(time.Second)
-		led.Set(!led.Get())
+		//led.Set(!led.Get())
 
 		sim.Tick(
 			0,
@@ -49,10 +49,12 @@ func Main() {
 		writeColors(neo, strip)
 		frames++
 
-		if frames%100 == 0 {
-			now := time.Now()
-			dt := now.Sub(t0)
-			fmt.Println(frames, dt, float64(frames)/dt.Seconds(), "\r")
+		if true {
+			if frames%100 == 0 {
+				now := time.Now()
+				dt := now.Sub(t0)
+				fmt.Println(frames, dt, float64(frames)/dt.Seconds(), "\r")
+			}
 		}
 	}
 }
@@ -76,9 +78,22 @@ func writeColors(neo ws2812.Device, st *strip.Strip) {
 		colors[i].R = uint8(clamp(0, led.R, 1.0) * ledMaxLevel * 255.0)
 		colors[i].G = uint8(clamp(0, led.G, 1.0) * ledMaxLevel * 255.0)
 		colors[i].B = uint8(clamp(0, led.B, 1.0) * ledMaxLevel * 255.0)
+		//colors[i].R = 32
+		//colors[i].G = 0
+		//colors[i].B = 0
 	})
 
-	err := neo.WriteColors(colors[:])
+	err := neo.WriteColors([]color.RGBA{{
+		R: 0,
+		G: 0,
+		B: 0,
+		A: 0,
+	}, {
+		R: 32,
+		G: 0,
+		B: 0,
+		A: 0,
+	}})
 	if err != nil {
 		fmt.Println("err: %s", err.Error())
 	}

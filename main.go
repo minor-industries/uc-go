@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"machine"
 	"tinygo/exe/ir"
+	"tinygo/exe/leds"
 	"tinygo/pio"
 )
 
@@ -58,6 +59,7 @@ func pioMain() {
 func main() {
 	ir.Main()
 	//pioMain()
+	leds.Main()
 }
 
 const clockHz = 133000000
