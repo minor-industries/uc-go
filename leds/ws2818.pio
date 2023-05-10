@@ -1,0 +1,36 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program ws2812
+.side_set 1
+
+.define public T1 2
+.define public T2 5
+.define public T3 3
+
+.lang_opt python sideset_init = pico.PIO.OUT_HIGH
+.lang_opt python out_init     = pico.PIO.OUT_HIGH
+.lang_opt python out_shiftdir = 1
+
+.wrap_target
+bitloop:
+    out x, 1       side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
+    jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
+do_one:
+    jmp  bitloop   side 1 [T2 - 1] ; Continue driving high, for a long pulse
+do_zero:
+    nop            side 0 [T2 - 1] ; Or drive low, for a short pulse
+.wrap
+
+% go {
+func ws2812ProgramInit(sm *machine.PIOStateMachine, offset uint8, pin machine.Pin) {
+	pin.Configure(machine.PinConfig{Mode: machine.PinPIO0})
+	sm.SetConsecutivePinDirs(pin, 1, true)
+	cfg := ws2812ProgramDefaultConfig(offset)
+	cfg.SetSetPins(pin, 1)
+	sm.Init(offset, &cfg)
+}
+%}
