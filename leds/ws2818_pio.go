@@ -3,7 +3,7 @@
 //go:build rp2040
 // +build rp2040
 
-package main
+package leds
 
 import (
 	"machine"
@@ -38,10 +38,24 @@ func ws2812ProgramDefaultConfig(offset uint8) pio.PIOStateMachineConfig {
 	return cfg
 }
 
-func ws2812ProgramInit(sm *pio.PIOStateMachine, offset uint8, pin machine.Pin) {
+const freq = 125_000_000
+
+func ws2812ProgramInit(
+	sm *pio.PIOStateMachine,
+	offset uint8,
+	pin machine.Pin,
+) {
 	pin.Configure(machine.PinConfig{Mode: machine.PinPIO0})
 	sm.SetConsecutivePinDirs(pin, 1, true)
 	cfg := ws2812ProgramDefaultConfig(offset)
 	cfg.SetSetPins(pin, 1)
+	cfg.SetOutShift(false, true, 24)
+
+	// Frequency = clock freq / (CLKDIV_INT + CLKDIV_FRAC / 256)
+
+	// TODO: set fifo join
+	//cycles_per_bit := ws2812T1 + ws2812T2 + ws2812T3
+
+	cfg.SetClkDivIntFrac(15, 159)
 	sm.Init(offset, &cfg)
 }
