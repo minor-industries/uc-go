@@ -59,8 +59,8 @@ func pioMain() {
 func main() {
 	ir.Main()
 	////pioMain()
-	//leds.Main()
-	leds.Run()
+	sm := leds.Setup()
+	leds.Write(sm)
 }
 
 const clockHz = 133000000
