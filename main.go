@@ -7,13 +7,20 @@ import (
 	"image/color"
 	"machine"
 	"time"
+	"tinygo/bounce"
+	"tinygo/cfg"
 	"tinygo/exe/ir"
 	"tinygo/leds"
 	"tinygo/pio"
+	"tinygo/strip"
 )
 
 const blinkWrapTarget = 2
 const blinkWrap = 7
+
+const (
+	ledMaxLevel = 0.5 // brightness level of NeoPxels (0~1)
+)
 
 var blinkProgram = pio.PIOProgram{
 	Instructions: []uint16{
@@ -63,16 +70,58 @@ func main() {
 	////pioMain()
 	sm := leds.Setup()
 
+	runLeds(sm)
+}
+
+func runLeds(sm *pio.PIOStateMachine) {
 	pixels := make([]color.RGBA, 150)
 	pixels[0].R = 0x10
 	pixels[1].G = 0x10
 	pixels[2].B = 0x10
 
-	for {
-		fmt.Printf("tx\r\n")
-		leds.Write(sm, pixels)
-		time.Sleep(1000 * time.Millisecond)
+	strip := strip.NewStrip(&cfg.Cfg{
+		NumLeds:    150,
+		StartIndex: 0,
+		Length:     5.0,
+	})
+	sim := bounce.Bounce(&bounce.App{Strip: strip})
+
+	tick := 30 * time.Millisecond
+
+	for range time.NewTicker(tick).C {
+		sim.Tick(
+			0,
+			tick.Seconds(),
+		)
+
+		writeColors(sm, pixels, strip)
 	}
+}
+
+func clamp(min, x, max float64) float64 {
+	if x < min {
+		return min
+	}
+
+	if x > max {
+		return max
+	}
+
+	return x
+}
+
+func writeColors(
+	sm *pio.PIOStateMachine,
+	pixels []color.RGBA,
+	st *strip.Strip,
+) {
+	st.Each(func(i int, led *strip.Led) {
+		pixels[i].R = uint8(clamp(0, led.R, 1.0) * ledMaxLevel * 255.0)
+		pixels[i].G = uint8(clamp(0, led.G, 1.0) * ledMaxLevel * 255.0)
+		pixels[i].B = uint8(clamp(0, led.B, 1.0) * ledMaxLevel * 255.0)
+	})
+
+	leds.Write(sm, pixels)
 }
 
 const clockHz = 133000000
