@@ -19,6 +19,10 @@ func NewStrip(env *cfg.Cfg) *Strip {
 
 }
 
+func (s *Strip) NumLeds() int {
+	return len(s.leds)
+}
+
 func (s *Strip) Fill(x0, x1 int, color Led) {
 	lastIndex := len(s.leds) - 1
 

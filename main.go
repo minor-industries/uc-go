@@ -3,13 +3,15 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
+	"sync/atomic"
 	"time"
-	"tinygo/bounce"
 	"tinygo/cfg"
 	"tinygo/exe/ir"
 	"tinygo/leds"
 	"tinygo/pio"
+	"tinygo/rainbow"
 	"tinygo/strip"
 )
 
@@ -33,16 +35,31 @@ func runLeds(sm *pio.PIOStateMachine) {
 		StartIndex: 0,
 		Length:     5.0,
 	})
-	sim := bounce.Bounce(&bounce.App{Strip: strip})
+	//sim := bounce.Bounce(&bounce.App{Strip: strip})
 
-	tick := 30 * time.Millisecond
+	tickDuration := 30 * time.Millisecond
 
-	for range time.NewTicker(tick).C {
-		sim.Tick(
-			0,
-			tick.Seconds(),
-		)
+	rb := rainbow.Rainbow1(
+		&rainbow.App{Strip: strip},
+		&rainbow.FaderConfig{TimeScale: 0.3},
+	)
 
+	count := uint32(0)
+	go func() {
+		for range time.NewTicker(time.Second).C {
+			fmt.Printf(
+				"count = %d\r\n",
+				atomic.LoadUint32(&count),
+			)
+		}
+	}()
+
+	for range time.NewTicker(tickDuration).C {
+		atomic.AddUint32(&count, 1)
+		time.Now().Second()
+
+		t := float64(time.Now().UnixNano()) / 1e9
+		rb(t, 0)
 		writeColors(sm, pixels, strip)
 	}
 }
