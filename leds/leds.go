@@ -3,7 +3,6 @@ package leds
 import (
 	"fmt"
 	"machine"
-	"time"
 	"tinygo/pio"
 )
 
@@ -26,14 +25,10 @@ func Setup() *pio.PIOStateMachine {
 func Write(sm *pio.PIOStateMachine) {
 	const smTxFullMask = 0x1
 
-	for {
-		fmt.Printf("tx\r\n")
-		for i := 0; i < 150; i++ {
-			for sm.PIO.Device.GetFSTAT_TXFULL()&smTxFullMask != 0 {
-				tightLoopContents()
-			}
-			sm.Tx(0x00101100)
+	for i := 0; i < 150; i++ {
+		for sm.PIO.Device.GetFSTAT_TXFULL()&smTxFullMask != 0 {
+			tightLoopContents()
 		}
-		time.Sleep(1000 * time.Millisecond)
+		sm.Tx(0x00101100)
 	}
 }

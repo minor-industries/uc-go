@@ -5,6 +5,7 @@ package main
 import (
 	"fmt"
 	"machine"
+	"time"
 	"tinygo/exe/ir"
 	"tinygo/leds"
 	"tinygo/pio"
@@ -60,7 +61,12 @@ func main() {
 	ir.Main()
 	////pioMain()
 	sm := leds.Setup()
-	leds.Write(sm)
+
+	for {
+		fmt.Printf("tx\r\n")
+		leds.Write(sm)
+		time.Sleep(1000 * time.Millisecond)
+	}
 }
 
 const clockHz = 133000000
