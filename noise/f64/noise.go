@@ -1,4 +1,4 @@
-package noise
+package f64
 
 var perm = [512]uint8{
 	151, 160, 137, 91, 90, 15,
