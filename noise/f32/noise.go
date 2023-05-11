@@ -126,5 +126,5 @@ func noise2(x, y float32) float32 {
 
 	// Add contributions from each corner to get the final noise value.
 	// The result is scaled to return values in the interval [-1,1].
-	return (n0 + n1 + n2) / 0.022108854818853867
+	return (n0 + n1 + n2) * (1 / 0.022108854818853867)
 }

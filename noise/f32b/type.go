@@ -36,6 +36,10 @@ func (f FloatT) Int() int {
 	return int(f.float32)
 }
 
+func (f FloatT) Float64() float64 {
+	return float64(f.float32)
+}
+
 func New(x float32) FloatT {
 	return FloatT{x}
 }

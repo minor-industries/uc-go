@@ -55,25 +55,29 @@ func Noise2(x, y float64) float64 {
 	return float64(noise2(
 		New(float32(x)),
 		New(float32(y)),
-	).float32)
+	).Float64())
 }
 
-func noise2(x, y FloatT) FloatT {
+var F2 = New(0.366025403)
+var G2 = New(0.211324865)
+var Zero = New(0)
+var Two = New(2)
+var Half = New(0.5)
+var Scale = New(1 / 0.022108854818853867)
 
-	const F2 = 0.366025403 // F2 = 0.5*(sqrt(3.0)-1.0)
-	const G2 = 0.211324865 // G2 = (3.0-Math.sqrt(3.0))/6.0
+func noise2(x, y FloatT) FloatT {
 
 	var n0, n1, n2 FloatT // Noise contributions from the three corners
 
 	// Skew the input space to determine which simplex cell we're in
 	//s := (x + y) * F2 // Hairy factor for 2D
-	s := x.Add(y).Mul(New(F2))
+	s := x.Add(y).Mul(F2)
 	xs := x.Add(s)
 	ys := y.Add(s)
 	i := FASTFLOOR(xs)
 	j := FASTFLOOR(ys)
 
-	t := INew(i + j).Mul(New(G2))
+	t := INew(i + j).Mul(G2)
 	X0 := INew(i).Sub(t) // Unskew the cell origin back to (x,y) space
 	Y0 := INew(j).Sub(t)
 	x0 := x.Sub(X0) // The x,y distances from the cell origin
@@ -94,35 +98,37 @@ func noise2(x, y FloatT) FloatT {
 	// a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
 	// c = (3-sqrt(3))/6
 
-	x1 := x0.Sub(INew(i1)).Add(New(G2)) // Offsets for middle corner in (x,y) unskewed coords
-	y1 := y0.Sub(INew(j1)).Add(New(G2))
-	x2 := x0.Sub(INew(1)).Add(New(2).Mul(New(G2))) // Offsets for last corner in (x,y) unskewed coords
-	y2 := y0.Sub(INew(1)).Add(New(2).Mul(New(G2)))
+	x1 := x0.Sub(INew(i1)).Add(G2) // Offsets for middle corner in (x,y) unskewed coords
+	y1 := y0.Sub(INew(j1)).Add(G2)
+
+	x2 := x0.Sub(INew(1)).Add(Two.Mul(G2)) // Offsets for last corner in (x,y) unskewed coords
+	y2 := y0.Sub(INew(1)).Add(Two.Mul(G2))
 
 	// Wrap the integer indices at 256, to avoid indexing perm[] out of bounds
 	ii := i & 0xff
 	jj := j & 0xff
 
 	// Calculate the contribution from the three corners
-	t0 := New(0.5).Sub(x0.Mul(x0)).Sub(y0.Mul(y0))
-	if t0.Lt(New(0)) {
-		n0 = New(0)
+	t0 := Half.Sub(x0.Mul(x0)).Sub(y0.Mul(y0))
+
+	if t0.Lt(Zero) {
+		n0 = Zero
 	} else {
 		t0 = t0.Mul(t0)
 		n0 = t0.Mul(t0).Mul(grad2(perm[ii+int(perm[jj])], x0, y0))
 	}
 
-	t1 := New(0.5).Sub(x1.Mul(x1)).Sub(y1.Mul(y1))
-	if t1.Lt(New(0)) {
-		n1 = New(0)
+	t1 := Half.Sub(x1.Mul(x1)).Sub(y1.Mul(y1))
+	if t1.Lt(Zero) {
+		n1 = Zero
 	} else {
 		t1 = t1.Mul(t1)
 		n1 = t1.Mul(t1).Mul(grad2(perm[ii+i1+int(perm[jj+j1])], x1, y1))
 	}
 
-	t2 := New(0.5).Sub(x2.Mul(x2)).Sub(y2.Mul(y2))
-	if t2.Lt(New(0)) {
-		n2 = New(0)
+	t2 := Half.Sub(x2.Mul(x2)).Sub(y2.Mul(y2))
+	if t2.Lt(Zero) {
+		n2 = Zero
 	} else {
 		t2 = t2.Mul(t2)
 		n2 = t2.Mul(t2).Mul(grad2(perm[ii+1+int(perm[jj+1])], x2, y2))
@@ -130,5 +136,5 @@ func noise2(x, y FloatT) FloatT {
 
 	// Add contributions from each corner to get the final noise value.
 	// The result is scaled to return values in the interval [-1,1].
-	return (n0.Add(n1).Add(n2)).Div(New(0.022108854818853867))
+	return (n0.Add(n1).Add(n2)).Mul(Scale)
 }
