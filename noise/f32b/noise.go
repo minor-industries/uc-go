@@ -1,21 +1,47 @@
 package f32b
 
-type Float32 float32
+type Float32 struct {
+	float32
+}
 
 func (f Float32) Add(x Float32) Float32 {
-	return f + x
+	return Float32{f.float32 + x.float32}
 }
 
 func (f Float32) Sub(x Float32) Float32 {
-	return f - x
+	return Float32{f.float32 - x.float32}
 }
 
 func (f Float32) Mul(x Float32) Float32 {
-	return f * x
+	return Float32{f.float32 * x.float32}
 }
 
 func (f Float32) Div(x Float32) Float32 {
-	return f / x
+	return Float32{f.float32 / x.float32}
+}
+
+func (f Float32) Neg() Float32 {
+	return Float32{-f.float32}
+}
+
+func (f Float32) Gt(x Float32) bool {
+	return f.float32 > x.float32
+}
+
+func (f Float32) Lt(x Float32) bool {
+	return f.float32 < x.float32
+}
+
+func (f Float32) Int() int {
+	return int(f.float32)
+}
+
+func New(x float32) Float32 {
+	return Float32{x}
+}
+
+func INew(i int) Float32 {
+	return Float32{float32(i)}
 }
 
 var perm = [512]uint8{
@@ -55,22 +81,25 @@ func Q(cond bool, v1 Float32, v2 Float32) Float32 {
 }
 
 func FASTFLOOR(x Float32) int {
-	if x > 0 {
-		return int(x)
+	if x.Gt(New(0.0)) {
+		return x.Int()
 	}
-	return int(x) - 1
+	return x.Int() - 1
 }
 
 func grad2(hash uint8, x Float32, y Float32) Float32 {
 	h := hash & 7       // Convert low 3 bits of hash code
 	u := Q(h < 4, x, y) // into 8 simple gradient directions,
 	v := Q(h < 4, y, x) // and compute the dot product with (x,y).
-	return Q(h&1 != 0, -u, u).Add(Q(h&2 != 0, -2*v, 2*v))
+	return Q(h&1 != 0, u.Neg(), u).Add(Q(h&2 != 0, New(-2).Mul(v), New(2).Mul(v)))
 }
 
 // 2D simplex noise
 func Noise2(x, y float64) float64 {
-	return float64(noise2(Float32(x), Float32(y)))
+	return float64(noise2(
+		New(float32(x)),
+		New(float32(y)),
+	).float32)
 }
 
 func noise2(x, y Float32) Float32 {
@@ -82,22 +111,22 @@ func noise2(x, y Float32) Float32 {
 
 	// Skew the input space to determine which simplex cell we're in
 	//s := (x + y) * F2 // Hairy factor for 2D
-	s := x.Add(y).Mul(F2)
+	s := x.Add(y).Mul(New(F2))
 	xs := x.Add(s)
 	ys := y.Add(s)
 	i := FASTFLOOR(xs)
 	j := FASTFLOOR(ys)
 
-	t := Float32(i+j) * G2
-	X0 := Float32(i).Sub(t) // Unskew the cell origin back to (x,y) space
-	Y0 := Float32(j).Sub(t)
+	t := INew(i + j).Mul(New(G2))
+	X0 := INew(i).Sub(t) // Unskew the cell origin back to (x,y) space
+	Y0 := INew(j).Sub(t)
 	x0 := x.Sub(X0) // The x,y distances from the cell origin
 	y0 := y.Sub(Y0)
 
 	// For the 2D case, the simplex shape is an equilateral triangle.
 	// Determine which simplex we are in.
 	var i1, j1 int // Offsets for second (middle) corner of simplex in (i,j) coords
-	if x0 > y0 {
+	if x0.Gt(y0) {
 		i1 = 1
 		j1 = 0 // lower triangle, XY order: (0,0)->(1,0)->(1,1)
 	} else {
@@ -109,35 +138,35 @@ func noise2(x, y Float32) Float32 {
 	// a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
 	// c = (3-sqrt(3))/6
 
-	x1 := x0.Sub(Float32(i1)).Add(G2) // Offsets for middle corner in (x,y) unskewed coords
-	y1 := y0.Sub(Float32(j1)).Add(G2)
-	x2 := x0.Sub(1).Add(2 * G2) // Offsets for last corner in (x,y) unskewed coords
-	y2 := y0.Sub(1).Add(2 * G2)
+	x1 := x0.Sub(INew(i1)).Add(New(G2)) // Offsets for middle corner in (x,y) unskewed coords
+	y1 := y0.Sub(INew(j1)).Add(New(G2))
+	x2 := x0.Sub(INew(1)).Add(New(2).Mul(New(G2))) // Offsets for last corner in (x,y) unskewed coords
+	y2 := y0.Sub(INew(1)).Add(New(2).Mul(New(G2)))
 
 	// Wrap the integer indices at 256, to avoid indexing perm[] out of bounds
 	ii := i & 0xff
 	jj := j & 0xff
 
 	// Calculate the contribution from the three corners
-	t0 := Float32(0.5).Sub(x0.Mul(x0)).Sub(y0.Mul(y0))
-	if t0 < 0 {
-		n0 = 0
+	t0 := New(0.5).Sub(x0.Mul(x0)).Sub(y0.Mul(y0))
+	if t0.Lt(New(0)) {
+		n0 = New(0)
 	} else {
 		t0 = t0.Mul(t0)
 		n0 = t0.Mul(t0).Mul(grad2(perm[ii+int(perm[jj])], x0, y0))
 	}
 
-	t1 := Float32(0.5).Sub(x1.Mul(x1)).Sub(y1.Mul(y1))
-	if t1 < 0 {
-		n1 = 0
+	t1 := New(0.5).Sub(x1.Mul(x1)).Sub(y1.Mul(y1))
+	if t1.Lt(New(0)) {
+		n1 = New(0)
 	} else {
 		t1 = t1.Mul(t1)
 		n1 = t1.Mul(t1).Mul(grad2(perm[ii+i1+int(perm[jj+j1])], x1, y1))
 	}
 
-	t2 := Float32(0.5).Sub(x2.Mul(x2)).Sub(y2.Mul(y2))
-	if t2 < 0 {
-		n2 = 0
+	t2 := New(0.5).Sub(x2.Mul(x2)).Sub(y2.Mul(y2))
+	if t2.Lt(New(0)) {
+		n2 = New(0)
 	} else {
 		t2 = t2.Mul(t2)
 		n2 = t2.Mul(t2).Mul(grad2(perm[ii+1+int(perm[jj+1])], x2, y2))
@@ -145,5 +174,5 @@ func noise2(x, y Float32) Float32 {
 
 	// Add contributions from each corner to get the final noise value.
 	// The result is scaled to return values in the interval [-1,1].
-	return (n0.Add(n1).Add(n2)).Div(0.022108854818853867)
+	return (n0.Add(n1).Add(n2)).Div(New(0.022108854818853867))
 }
