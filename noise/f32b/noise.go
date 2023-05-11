@@ -1,49 +1,5 @@
 package f32b
 
-type Float32 struct {
-	float32
-}
-
-func (f Float32) Add(x Float32) Float32 {
-	return Float32{f.float32 + x.float32}
-}
-
-func (f Float32) Sub(x Float32) Float32 {
-	return Float32{f.float32 - x.float32}
-}
-
-func (f Float32) Mul(x Float32) Float32 {
-	return Float32{f.float32 * x.float32}
-}
-
-func (f Float32) Div(x Float32) Float32 {
-	return Float32{f.float32 / x.float32}
-}
-
-func (f Float32) Neg() Float32 {
-	return Float32{-f.float32}
-}
-
-func (f Float32) Gt(x Float32) bool {
-	return f.float32 > x.float32
-}
-
-func (f Float32) Lt(x Float32) bool {
-	return f.float32 < x.float32
-}
-
-func (f Float32) Int() int {
-	return int(f.float32)
-}
-
-func New(x float32) Float32 {
-	return Float32{x}
-}
-
-func INew(i int) Float32 {
-	return Float32{float32(i)}
-}
-
 var perm = [512]uint8{
 	151, 160, 137, 91, 90, 15,
 	131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
@@ -73,21 +29,21 @@ var perm = [512]uint8{
 	138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180,
 }
 
-func Q(cond bool, v1 Float32, v2 Float32) Float32 {
+func Q(cond bool, v1 FloatT, v2 FloatT) FloatT {
 	if cond {
 		return v1
 	}
 	return v2
 }
 
-func FASTFLOOR(x Float32) int {
+func FASTFLOOR(x FloatT) int {
 	if x.Gt(New(0.0)) {
 		return x.Int()
 	}
 	return x.Int() - 1
 }
 
-func grad2(hash uint8, x Float32, y Float32) Float32 {
+func grad2(hash uint8, x FloatT, y FloatT) FloatT {
 	h := hash & 7       // Convert low 3 bits of hash code
 	u := Q(h < 4, x, y) // into 8 simple gradient directions,
 	v := Q(h < 4, y, x) // and compute the dot product with (x,y).
@@ -102,12 +58,12 @@ func Noise2(x, y float64) float64 {
 	).float32)
 }
 
-func noise2(x, y Float32) Float32 {
+func noise2(x, y FloatT) FloatT {
 
 	const F2 = 0.366025403 // F2 = 0.5*(sqrt(3.0)-1.0)
 	const G2 = 0.211324865 // G2 = (3.0-Math.sqrt(3.0))/6.0
 
-	var n0, n1, n2 Float32 // Noise contributions from the three corners
+	var n0, n1, n2 FloatT // Noise contributions from the three corners
 
 	// Skew the input space to determine which simplex cell we're in
 	//s := (x + y) * F2 // Hairy factor for 2D

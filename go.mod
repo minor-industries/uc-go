@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/stretchr/testify v1.8.2
+	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
 	tinygo.org/x/drivers v0.23.0
 )
 
