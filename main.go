@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"machine"
 	"time"
 	"tinygo/exe/ir"
@@ -62,9 +63,14 @@ func main() {
 	////pioMain()
 	sm := leds.Setup()
 
+	pixels := make([]color.RGBA, 150)
+	pixels[0].R = 0x10
+	pixels[1].G = 0x10
+	pixels[2].B = 0x10
+
 	for {
 		fmt.Printf("tx\r\n")
-		leds.Write(sm)
+		leds.Write(sm, pixels)
 		time.Sleep(1000 * time.Millisecond)
 	}
 }

@@ -2,6 +2,7 @@ package leds
 
 import (
 	"fmt"
+	"image/color"
 	"machine"
 	"tinygo/pio"
 )
@@ -22,13 +23,18 @@ func Setup() *pio.PIOStateMachine {
 	return sm
 }
 
-func Write(sm *pio.PIOStateMachine) {
+func Write(sm *pio.PIOStateMachine, pixels []color.RGBA) {
 	const smTxFullMask = 0x1
 
-	for i := 0; i < 150; i++ {
+	for _, pixel := range pixels {
 		for sm.PIO.Device.GetFSTAT_TXFULL()&smTxFullMask != 0 {
 			tightLoopContents()
 		}
-		sm.Tx(0x00101100)
+		r := uint32(pixel.R)
+		g := uint32(pixel.G)
+		b := uint32(pixel.B)
+
+		v := g<<24 + r<<16 + b<<8
+		sm.Tx(v)
 	}
 }
