@@ -57,7 +57,7 @@ func grad2(hash uint8, x Float32, y Float32) Float32 {
 	h := hash & 7       // Convert low 3 bits of hash code
 	u := Q(h < 4, x, y) // into 8 simple gradient directions,
 	v := Q(h < 4, y, x) // and compute the dot product with (x,y).
-	return Q(h&1 != 0, -u, u) + Q(h&2 != 0, -2*v, 2*v)
+	return Q(h&1 != 0, -u, u).Add(Q(h&2 != 0, -2*v, 2*v))
 }
 
 // 2D simplex noise

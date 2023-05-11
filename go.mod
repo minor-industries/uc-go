@@ -3,6 +3,12 @@ module tinygo
 go 1.19
 
 require (
-	github.com/larspensjo/Go-simplex-noise v0.0.0-20121005164837-bfdcb9fc4b93
+	github.com/stretchr/testify v1.8.2
 	tinygo.org/x/drivers v0.23.0
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
