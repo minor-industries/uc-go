@@ -67,22 +67,19 @@ func (f *fader) fade(
 
 	f.app.Strip.Each(func(i int, led *strip.Led) {
 		pos := f.positions[i]
-		led.R = rangeR * (0.5 + 0.5*simplexnoise.Noise3(
-			pos.x+000,
+		led.R = rangeR * (0.5 + 0.5*simplexnoise.Noise2(
+			pos.x+000+t*f.cfg.TimeScale,
 			pos.y+000,
-			t*f.cfg.TimeScale,
 		))
 
-		led.G = rangeG * (0.5 + 0.5*simplexnoise.Noise3(
-			pos.x+100,
+		led.G = rangeG * (0.5 + 0.5*simplexnoise.Noise2(
+			pos.x+100+t*f.cfg.TimeScale,
 			pos.y+100,
-			t*f.cfg.TimeScale,
 		))
 
-		led.B = rangeB * (0.5 + 0.5*simplexnoise.Noise3(
-			pos.x+200,
+		led.B = rangeB * (0.5 + 0.5*simplexnoise.Noise2(
+			pos.x+200+t*f.cfg.TimeScale,
 			pos.y+200,
-			t*f.cfg.TimeScale,
 		))
 	})
 }

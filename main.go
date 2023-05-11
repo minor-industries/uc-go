@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"sync/atomic"
 	"time"
+	"tinygo/bounce"
 	"tinygo/cfg"
 	"tinygo/exe/ir"
 	"tinygo/leds"
@@ -35,7 +36,7 @@ func runLeds(sm *pio.PIOStateMachine) {
 		StartIndex: 0,
 		Length:     5.0,
 	})
-	//sim := bounce.Bounce(&bounce.App{Strip: strip})
+	sim := bounce.Bounce(&bounce.App{Strip: strip})
 
 	tickDuration := 30 * time.Millisecond
 
@@ -45,21 +46,32 @@ func runLeds(sm *pio.PIOStateMachine) {
 	)
 
 	count := uint32(0)
+	t0 := time.Now()
+
 	go func() {
 		for range time.NewTicker(time.Second).C {
-			fmt.Printf(
-				"count = %d\r\n",
-				atomic.LoadUint32(&count),
+			count := atomic.LoadUint32(&count)
+			dt := time.Now().Sub(t0)
+			line := fmt.Sprintf(
+				"count = %d, t=%s, fps=%0.02f",
+				count,
+				time.Now().String(),
+				float64(count)/dt.Seconds(),
 			)
+			fmt.Printf(line + "\r\n")
 		}
 	}()
 
 	for range time.NewTicker(tickDuration).C {
 		atomic.AddUint32(&count, 1)
-		time.Now().Second()
 
-		t := float64(time.Now().UnixNano()) / 1e9
-		rb(t, 0)
+		if false {
+			sim.Tick(0, tickDuration.Seconds())
+		} else {
+			t := float64(time.Now().UnixNano()) / 1e9
+			rb(t, 0)
+		}
+
 		writeColors(sm, pixels, strip)
 	}
 }
