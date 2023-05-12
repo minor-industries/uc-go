@@ -29,6 +29,14 @@ var perm = [512]uint8{
 	138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180,
 }
 
+var F2 = New(0.366025403)
+var G2 = New(0.211324865)
+var Zero = New(0)
+var Two = New(2)
+var MinusTwo = New(-2)
+var Half = New(0.5)
+var Scale = New(1 / 0.022108854818853867)
+
 func Q(cond bool, v1 FloatT, v2 FloatT) FloatT {
 	if cond {
 		return v1
@@ -37,7 +45,7 @@ func Q(cond bool, v1 FloatT, v2 FloatT) FloatT {
 }
 
 func FASTFLOOR(x FloatT) int32 {
-	if x.Gt(New(0.0)) {
+	if x.Gt(Zero) {
 		return x.Int()
 	}
 	return x.Int() - 1
@@ -47,7 +55,7 @@ func grad2(hash uint8, x FloatT, y FloatT) FloatT {
 	h := hash & 7       // Convert low 3 bits of hash code
 	u := Q(h < 4, x, y) // into 8 simple gradient directions,
 	v := Q(h < 4, y, x) // and compute the dot product with (x,y).
-	return Q(h&1 != 0, u.Neg(), u).Add(Q(h&2 != 0, New(-2).Mul(v), New(2).Mul(v)))
+	return Q(h&1 != 0, u.Neg(), u).Add(Q(h&2 != 0, MinusTwo.Mul(v), Two.Mul(v)))
 }
 
 // 2D simplex noise
@@ -57,13 +65,6 @@ func Noise2(x, y float64) float64 {
 		New(float32(y)),
 	).Float64()
 }
-
-var F2 = New(0.366025403)
-var G2 = New(0.211324865)
-var Zero = New(0)
-var Two = New(2)
-var Half = New(0.5)
-var Scale = New(1 / 0.022108854818853867)
 
 func noise2(x, y FloatT) FloatT {
 	var n0, n1, n2 FloatT // Noise contributions from the three corners
