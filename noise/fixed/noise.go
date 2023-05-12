@@ -59,11 +59,8 @@ func grad2(hash uint8, x FloatT, y FloatT) FloatT {
 }
 
 // 2D simplex noise
-func Noise2(x, y float64) float64 {
-	return noise2(
-		New(float32(x)),
-		New(float32(y)),
-	).Float64()
+func Noise2(x, y float32) float32 {
+	return noise2(New(x), New(y)).Float32()
 }
 
 func noise2(x, y FloatT) FloatT {

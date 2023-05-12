@@ -42,7 +42,7 @@ type FaderConfig struct {
 }
 
 type fader struct {
-	positions []Vec2
+	positions []complex64
 	cfg       *FaderConfig
 	app       *App
 }
@@ -51,7 +51,7 @@ func newFader(app *App, cfg *FaderConfig) *fader {
 	return &fader{
 		app:       app,
 		cfg:       cfg,
-		positions: make([]Vec2, app.Strip.NumLeds()),
+		positions: make([]complex64, app.Strip.NumLeds()),
 	}
 }
 
@@ -63,26 +63,31 @@ const (
 
 func (f *fader) fade(
 	theta float64,
-	t float64,
+	t_ float64,
 ) {
+	t := float32(t_)
+	scale := float32(f.cfg.TimeScale)
 	//f.calculatePositions(theta)
 
 	f.app.Strip.Each(func(i int, led *strip.Led) {
 		pos := f.positions[i]
-		led.R = rangeR * (0.5 + 0.5*fixed.Noise2(
-			pos.x+000+t*f.cfg.TimeScale,
-			0,
+
+		r := rangeR * (0.5 + 0.5*fixed.Noise2(
+			real(pos)+000+t*scale,
+			imag(pos)+000,
 		))
 
-		led.G = rangeG * (0.5 + 0.5*fixed.Noise2(
-			pos.x+100+t*f.cfg.TimeScale,
-			0,
+		g := rangeG * (0.5 + 0.5*fixed.Noise2(
+			real(pos)+100+t*scale,
+			imag(pos)+100,
 		))
 
-		led.B = rangeB * (0.5 + 0.5*fixed.Noise2(
-			pos.x+200+t*f.cfg.TimeScale,
-			0,
+		b := rangeB * (0.5 + 0.5*fixed.Noise2(
+			real(pos)+200+t*scale,
+			imag(pos)+200,
 		))
+
+		led.R, led.G, led.B = float64(r), float64(g), float64(b)
 	})
 }
 
@@ -93,8 +98,8 @@ func (f *fader) calculatePositions(theta float64) {
 	for i := 0; i < n; i++ {
 		phi := (2 * math.Pi) * (float64(i) / float64(n))
 		phi += theta // rotate
-		u := Vec2{math.Cos(phi), math.Sin(phi)}
-		u = u.Scale(ledRingRadius * 3.333)
-		f.positions[i] = u
+		u := complex(math.Cos(phi), math.Sin(phi))
+		u *= complex(ledRingRadius*3.333, 0)
+		f.positions[i] = complex64(u)
 	}
 }

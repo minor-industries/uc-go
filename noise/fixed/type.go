@@ -2,8 +2,8 @@ package fixed
 
 const (
 	precision = 13
-	scale     = float32(1 << precision)
-	invScale  = 1.0 / float64(1<<precision)
+	scale     = 1 << precision
+	invScale  = 1.0 / (1 << precision)
 )
 
 type FloatT struct {
@@ -46,6 +46,10 @@ func (f FloatT) Int() int32 {
 
 func (f FloatT) Float64() float64 {
 	return float64(f.x) * invScale
+}
+
+func (f FloatT) Float32() float32 {
+	return float32(f.x) * invScale
 }
 
 func New(x float32) FloatT {
