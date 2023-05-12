@@ -37,12 +37,13 @@ func (f FloatT) Int() int {
 }
 
 func (f FloatT) Float64() float64 {
-	return 0.0 // TODO
+	scale := float64(1 << 6)
+	return float64(f.x) / scale
 }
 
 func New(x float32) FloatT {
-	//math.Floor(x) // TODO
-	return FloatT{} // TODO
+	scale := float32(1 << 6)
+	return FloatT{x: fixed.I(int(x * scale))}
 }
 
 func INew(i int) FloatT {

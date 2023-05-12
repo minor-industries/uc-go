@@ -2,7 +2,7 @@ package rainbow
 
 import (
 	"math"
-	"tinygo/noise/f32b"
+	"tinygo/noise/f32"
 	"tinygo/strip"
 )
 
@@ -21,6 +21,7 @@ type App struct {
 
 func Rainbow1(app *App, cfg *FaderConfig) callback {
 	fade := newFader(app, cfg)
+	fade.calculatePositions(0)
 
 	return func(t, dt float64) {
 		fade.fade(0, t)
@@ -29,6 +30,7 @@ func Rainbow1(app *App, cfg *FaderConfig) callback {
 
 func rainbow2(app *App, cfg *FaderConfig) callback {
 	fade := newFader(app, cfg)
+	fade.calculatePositions(0)
 
 	return func(t, dt float64) {
 		fade.fade(8*math.Sin(t/4.0), t)
@@ -63,23 +65,20 @@ func (f *fader) fade(
 	theta float64,
 	t float64,
 ) {
-	f.calculatePositions(theta)
+	//f.calculatePositions(theta)
 
 	f.app.Strip.Each(func(i int, led *strip.Led) {
 		pos := f.positions[i]
-		led.R = rangeR * (0.5 + 0.5*f32b.Noise2(
+		led.R = rangeR * (0.5 + 0.5*f32.Noise1(
 			pos.x+000+t*f.cfg.TimeScale,
-			pos.y+000,
 		))
 
-		led.G = rangeG * (0.5 + 0.5*f32b.Noise2(
+		led.G = rangeG * (0.5 + 0.5*f32.Noise1(
 			pos.x+100+t*f.cfg.TimeScale,
-			pos.y+100,
 		))
 
-		led.B = rangeB * (0.5 + 0.5*f32b.Noise2(
+		led.B = rangeB * (0.5 + 0.5*f32.Noise1(
 			pos.x+200+t*f.cfg.TimeScale,
-			pos.y+200,
 		))
 	})
 }
