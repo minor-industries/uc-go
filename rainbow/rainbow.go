@@ -21,7 +21,6 @@ type App struct {
 
 func Rainbow1(app *App, cfg *FaderConfig) callback {
 	fade := newFader(app, cfg)
-	fade.calculatePositions(0)
 
 	return func(t, dt float64) {
 		fade.fade(0, t)
@@ -30,7 +29,6 @@ func Rainbow1(app *App, cfg *FaderConfig) callback {
 
 func rainbow2(app *App, cfg *FaderConfig) callback {
 	fade := newFader(app, cfg)
-	fade.calculatePositions(0)
 
 	return func(t, dt float64) {
 		fade.fade(8*math.Sin(t/4.0), t)
@@ -67,7 +65,7 @@ func (f *fader) fade(
 ) {
 	t := float32(t_)
 	scale := float32(f.cfg.TimeScale)
-	//f.calculatePositions(theta)
+	f.calculatePositions(theta)
 
 	f.app.Strip.Each(func(i int, led *strip.Led) {
 		pos := f.positions[i]
@@ -94,12 +92,15 @@ func (f *fader) fade(
 func (f *fader) calculatePositions(theta float64) {
 	n := len(f.positions)
 
+	c := complex64(complex(ledRingRadius*3.333, 0))
+	c *= complex64(complex(math.Cos(theta), math.Sin(theta)))
+
+	dPhi := (2 * math.Pi) * (1.0 / float64(n))
+	incr := complex64(complex(math.Cos(dPhi), math.Sin(dPhi)))
+
 	// Calculate real-world approximate position of LEDS, rotated by theta
 	for i := 0; i < n; i++ {
-		phi := (2 * math.Pi) * (float64(i) / float64(n))
-		phi += theta // rotate
-		u := complex(math.Cos(phi), math.Sin(phi))
-		u *= complex(ledRingRadius*3.333, 0)
-		f.positions[i] = complex64(u)
+		f.positions[i] = c
+		c *= incr
 	}
 }
