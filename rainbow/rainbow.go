@@ -2,7 +2,7 @@ package rainbow
 
 import (
 	"math"
-	"tinygo/noise/f32b"
+	"tinygo/noise/fixed"
 	"tinygo/strip"
 )
 
@@ -69,17 +69,17 @@ func (f *fader) fade(
 
 	f.app.Strip.Each(func(i int, led *strip.Led) {
 		pos := f.positions[i]
-		led.R = rangeR * (0.5 + 0.5*f32b.Noise2(
+		led.R = rangeR * (0.5 + 0.5*fixed.Noise2(
 			pos.x+000+t*f.cfg.TimeScale,
 			0,
 		))
 
-		led.G = rangeG * (0.5 + 0.5*f32b.Noise2(
+		led.G = rangeG * (0.5 + 0.5*fixed.Noise2(
 			pos.x+100+t*f.cfg.TimeScale,
 			0,
 		))
 
-		led.B = rangeB * (0.5 + 0.5*f32b.Noise2(
+		led.B = rangeB * (0.5 + 0.5*fixed.Noise2(
 			pos.x+200+t*f.cfg.TimeScale,
 			0,
 		))
