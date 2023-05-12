@@ -27,7 +27,7 @@ func Rainbow1(app *App, cfg *FaderConfig) callback {
 	}
 }
 
-func rainbow2(app *App, cfg *FaderConfig) callback {
+func Rainbow2(app *App, cfg *FaderConfig) callback {
 	fade := newFader(app, cfg)
 
 	return func(t, dt float64) {

@@ -40,7 +40,7 @@ func runLeds(sm *pio.PIOStateMachine) {
 
 	tickDuration := 30 * time.Millisecond
 
-	rb := rainbow.Rainbow1(
+	rb := rainbow.Rainbow2(
 		&rainbow.App{Strip: strip},
 		&rainbow.FaderConfig{TimeScale: 0.3},
 	)
