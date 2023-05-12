@@ -1,11 +1,13 @@
 package fixed
 
-import (
-	"golang.org/x/image/math/fixed"
+const (
+	precision = 6
+	scale     = float32(1 << 6)
+	invScale  = 1.0 / float64(1<<6)
 )
 
 type FloatT struct {
-	x fixed.Int26_6
+	x int32
 }
 
 func (f FloatT) Add(x FloatT) FloatT {
@@ -17,7 +19,10 @@ func (f FloatT) Sub(x FloatT) FloatT {
 }
 
 func (f FloatT) Mul(x FloatT) FloatT {
-	return FloatT{f.x.Mul(x.x)}
+	var result = int64(f.x) * int64(x.x)
+	result >>= precision * 2
+
+	return FloatT{int32(result)}
 }
 
 func (f FloatT) Neg() FloatT {
@@ -32,20 +37,18 @@ func (f FloatT) Lt(x FloatT) bool {
 	return f.x < x.x
 }
 
-func (f FloatT) Int() int {
-	return f.x.Floor()
+func (f FloatT) Int() int32 {
+	return f.x >> precision
 }
 
 func (f FloatT) Float64() float64 {
-	scale := float64(1 << 6)
-	return float64(f.x) / scale
+	return float64(f.x) * invScale
 }
 
 func New(x float32) FloatT {
-	scale := float32(1 << 6)
-	return FloatT{x: fixed.I(int(x * scale))}
+	return FloatT{x: int32(x * scale)}
 }
 
-func INew(i int) FloatT {
-	return FloatT{fixed.I(i)}
+func INew(i int32) FloatT {
+	return FloatT{x: int32(i << precision)}
 }

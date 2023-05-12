@@ -36,7 +36,7 @@ func Q(cond bool, v1 FloatT, v2 FloatT) FloatT {
 	return v2
 }
 
-func FASTFLOOR(x FloatT) int {
+func FASTFLOOR(x FloatT) int32 {
 	if x.Gt(New(0.0)) {
 		return x.Int()
 	}
@@ -84,7 +84,7 @@ func noise2(x, y FloatT) FloatT {
 
 	// For the 2D case, the simplex shape is an equilateral triangle.
 	// Determine which simplex we are in.
-	var i1, j1 int // Offsets for second (middle) corner of simplex in (i,j) coords
+	var i1, j1 int32 // Offsets for second (middle) corner of simplex in (i,j) coords
 	if x0.Gt(y0) {
 		i1 = 1
 		j1 = 0 // lower triangle, XY order: (0,0)->(1,0)->(1,1)
@@ -114,7 +114,7 @@ func noise2(x, y FloatT) FloatT {
 		n0 = Zero
 	} else {
 		t0 = t0.Mul(t0)
-		n0 = t0.Mul(t0).Mul(grad2(perm[ii+int(perm[jj])], x0, y0))
+		n0 = t0.Mul(t0).Mul(grad2(perm[ii+int32(perm[jj])], x0, y0))
 	}
 
 	t1 := Half.Sub(x1.Mul(x1)).Sub(y1.Mul(y1))
@@ -122,7 +122,7 @@ func noise2(x, y FloatT) FloatT {
 		n1 = Zero
 	} else {
 		t1 = t1.Mul(t1)
-		n1 = t1.Mul(t1).Mul(grad2(perm[ii+i1+int(perm[jj+j1])], x1, y1))
+		n1 = t1.Mul(t1).Mul(grad2(perm[ii+i1+int32(perm[jj+j1])], x1, y1))
 	}
 
 	t2 := Half.Sub(x2.Mul(x2)).Sub(y2.Mul(y2))
@@ -130,7 +130,7 @@ func noise2(x, y FloatT) FloatT {
 		n2 = Zero
 	} else {
 		t2 = t2.Mul(t2)
-		n2 = t2.Mul(t2).Mul(grad2(perm[ii+1+int(perm[jj+1])], x2, y2))
+		n2 = t2.Mul(t2).Mul(grad2(perm[ii+1+int32(perm[jj+1])], x2, y2))
 	}
 
 	// Add contributions from each corner to get the final noise value.
