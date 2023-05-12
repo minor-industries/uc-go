@@ -38,6 +38,9 @@ func (f FloatT) Lt(x FloatT) bool {
 }
 
 func (f FloatT) Int() int32 {
+	if f.x < 0 {
+		return -(-f.x >> precision)
+	}
 	return f.x >> precision
 }
 
