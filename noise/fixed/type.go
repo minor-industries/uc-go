@@ -1,7 +1,7 @@
 package fixed
 
 const (
-	precision = 12
+	precision = 13
 	scale     = float32(1 << precision)
 	invScale  = 1.0 / float64(1<<precision)
 )

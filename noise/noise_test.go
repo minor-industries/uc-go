@@ -23,7 +23,7 @@ func TestNoise(t *testing.T) {
 			t.Run(fmt.Sprintf("%0.02f %0.02f", x, y), func(t *testing.T) {
 				a := f32.Noise2(x, y)
 				b := fixed.Noise2(x, y)
-				assert.InDelta(t, a, b, 0.055)
+				assert.InDelta(t, a, b, 0.025)
 			})
 		}
 	}
