@@ -53,14 +53,8 @@ func runLeds(sm *pio.PIOStateMachine) {
 		StartIndex: 0,
 		Length:     5.0,
 	})
-	sim := bounce.Bounce(&bounce.App{Strip: strip})
 
 	tickDuration := 30 * time.Millisecond
-
-	rb := rainbow.Rainbow2(
-		&rainbow.App{Strip: strip},
-		&rainbow.FaderConfig{TimeScale: 0.3},
-	)
 
 	count := uint32(0)
 	t0 := time.Now()
@@ -79,16 +73,28 @@ func runLeds(sm *pio.PIOStateMachine) {
 		}
 	}()
 
+	animations := map[string]func(t, dt float64){
+		"rainbow1": rainbow.Rainbow1(
+			&rainbow.App{Strip: strip},
+			&rainbow.FaderConfig{TimeScale: 0.3},
+		),
+		"rainbow2": rainbow.Rainbow2(
+			&rainbow.App{Strip: strip},
+			&rainbow.FaderConfig{TimeScale: 0.03},
+		),
+		"bounce": bounce.Bounce(
+			&bounce.App{Strip: strip},
+		).Tick,
+	}
+
+	currentAnimation := "bounce"
+
 	f := func() {
 		atomic.AddUint32(&count, 1)
 
-		if false {
-			sim.Tick(0, tickDuration.Seconds())
-		} else {
-			t := float64(time.Now().UnixNano()) / 1e9
-			rb(t, 0)
-		}
-
+		cb := animations[currentAnimation]
+		t := float64(time.Now().UnixNano()) / 1e9
+		cb(t, tickDuration.Seconds())
 		writeColors(sm, pixels, strip)
 	}
 
