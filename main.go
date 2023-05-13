@@ -88,7 +88,6 @@ func runLeds(
 
 	go func() {
 		for range time.NewTicker(time.Second).C {
-			curCfg := config.SnapShot()
 			count := atomic.LoadUint32(&count)
 			dt := time.Now().Sub(t0)
 			line := fmt.Sprintf(
@@ -98,7 +97,6 @@ func runLeds(
 				float64(count)/dt.Seconds(),
 			)
 			fmt.Printf(line + "\r\n")
-			fmt.Printf("scale = %f\r\n", curCfg.Scale)
 		}
 	}()
 

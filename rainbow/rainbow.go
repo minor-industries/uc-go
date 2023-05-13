@@ -53,12 +53,6 @@ func newFader(app *App, cfg *FaderConfig) *fader {
 	}
 }
 
-const (
-	rangeR = 0.5
-	rangeG = 0.5
-	rangeB = 0.5
-)
-
 func (f *fader) fade(
 	theta float64,
 	t_ float64,
@@ -67,23 +61,28 @@ func (f *fader) fade(
 	scale := float32(f.cfg.TimeScale)
 	f.calculatePositions(theta)
 
+	const (
+		a = 0.25
+		b = 0.25
+	)
+
 	f.app.Strip.Each(func(i int, led *strip.Led) {
 		pos := f.positions[i]
 
-		r := rangeR * (0.5 + 0.5*fixed.Noise2(
+		r := a + b*fixed.Noise2(
 			real(pos)+000+t*scale,
 			imag(pos)+000,
-		))
+		)
 
-		g := rangeG * (0.5 + 0.5*fixed.Noise2(
+		g := a + b*fixed.Noise2(
 			real(pos)+100+t*scale,
 			imag(pos)+100,
-		))
+		)
 
-		b := rangeB * (0.5 + 0.5*fixed.Noise2(
+		b := a + b*fixed.Noise2(
 			real(pos)+200+t*scale,
 			imag(pos)+200,
-		))
+		)
 
 		led.R, led.G, led.B = r, g, b
 	})
