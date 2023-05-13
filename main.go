@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"sync/atomic"
 	"time"
+	"tinygo.org/x/drivers/irremote"
 	"tinygo/bounce"
 	"tinygo/cfg"
 	"tinygo/exe/ir"
@@ -21,10 +22,26 @@ const (
 )
 
 func main() {
-	ir.Main()
-	////pioMain()
-	sm := leds.Setup()
+	logs := make(chan irremote.Data, 10)
 
+	ir.Main(func(data irremote.Data) {
+		logs <- data
+	})
+
+	go func() {
+		for log := range logs {
+			line := fmt.Sprintf(
+				"0x%02x, 0x%02x, 0x%02x 0x%02x",
+				log.Code,
+				log.Flags,
+				log.Command,
+				log.Address,
+			)
+			fmt.Println(line + "\r")
+		}
+	}()
+
+	sm := leds.Setup()
 	runLeds(sm)
 }
 
