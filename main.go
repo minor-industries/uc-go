@@ -79,7 +79,7 @@ func runLeds(sm *pio.PIOStateMachine) {
 		}
 	}()
 
-	for range time.NewTicker(tickDuration).C {
+	f := func() {
 		atomic.AddUint32(&count, 1)
 
 		if false {
@@ -90,6 +90,10 @@ func runLeds(sm *pio.PIOStateMachine) {
 		}
 
 		writeColors(sm, pixels, strip)
+	}
+
+	for range time.NewTicker(tickDuration).C {
+		f()
 	}
 }
 
