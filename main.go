@@ -23,17 +23,15 @@ const (
 )
 
 func main() {
-	config := &cfg.SyncConfig{
-		Config: cfg.Config{
-			CurrentAnimation: "rainbow1",
-			NumLeds:          150,
-			StartIndex:       0,
-			Length:           5.0,
-			Scale:            0.5,
-			MinScale:         0.3,
-			ScaleIncr:        0.02,
-		},
-	}
+	config := cfg.NewSyncConfig(cfg.Config{
+		CurrentAnimation: "rainbow1",
+		NumLeds:          150,
+		StartIndex:       0,
+		Length:           5.0,
+		Scale:            0.5,
+		MinScale:         0.3,
+		ScaleIncr:        0.02,
+	})
 
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {
@@ -90,6 +88,7 @@ func runLeds(
 
 	go func() {
 		for range time.NewTicker(time.Second).C {
+			curCfg := config.SnapShot()
 			count := atomic.LoadUint32(&count)
 			dt := time.Now().Sub(t0)
 			line := fmt.Sprintf(
@@ -99,6 +98,7 @@ func runLeds(
 				float64(count)/dt.Seconds(),
 			)
 			fmt.Printf(line + "\r\n")
+			fmt.Printf("scale = %f\r\n", curCfg.Scale)
 		}
 	}()
 
@@ -123,7 +123,7 @@ func runLeds(
 		cb := animations[curCfg.CurrentAnimation]
 		t := float64(time.Now().UnixNano()) / 1e9
 		cb(t, tickDuration.Seconds())
-		writeColors(sm, pixels, strip)
+		writeColors(sm, curCfg.Scale, pixels, strip)
 	}
 
 	ticker := time.NewTicker(tickDuration)
@@ -137,17 +137,19 @@ func runLeds(
 
 func writeColors(
 	sm *pio.PIOStateMachine,
+	scale float32,
 	pixels []color.RGBA,
 	st *strip.Strip,
 ) {
-	scale := func(x float64) uint8 {
-		return uint8(util.Clamp(0, x, 1.0) * ledMaxLevel * 255.0)
+	convert := func(x float32) uint8 {
+		val := x * scale
+		return uint8(util.Clamp(0, val, 1.0) * ledMaxLevel * 255.0)
 	}
 
 	st.Each(func(i int, led *strip.Led) {
-		pixels[i].R = scale(led.R)
-		pixels[i].G = scale(led.G)
-		pixels[i].B = scale(led.B)
+		pixels[i].R = convert(led.R)
+		pixels[i].G = convert(led.G)
+		pixels[i].B = convert(led.B)
 	})
 
 	leds.Write(sm, pixels)

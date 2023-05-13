@@ -85,7 +85,7 @@ func (f *fader) fade(
 			imag(pos)+200,
 		))
 
-		led.R, led.G, led.B = float64(r), float64(g), float64(b)
+		led.R, led.G, led.B = r, g, b
 	})
 }
 

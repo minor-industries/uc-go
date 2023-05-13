@@ -3,7 +3,7 @@ package strip
 import "tinygo/cfg"
 
 type Led struct {
-	R, G, B float64
+	R, G, B float32
 }
 
 type Strip struct {
