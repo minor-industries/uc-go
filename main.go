@@ -46,13 +46,18 @@ func main() {
 }
 
 func runLeds(sm *pio.PIOStateMachine) {
+	config := &cfg.SyncConfig{
+		Config: cfg.Config{
+			CurrentAnimation: "rainbow1",
+			NumLeds:          150,
+			StartIndex:       0,
+			Length:           5.0,
+		},
+	}
+
 	pixels := make([]color.RGBA, 150)
 
-	strip := strip.NewStrip(&cfg.Cfg{
-		NumLeds:    150,
-		StartIndex: 0,
-		Length:     5.0,
-	})
+	strip := strip.NewStrip(config.SnapShot())
 
 	tickDuration := 30 * time.Millisecond
 
@@ -87,12 +92,11 @@ func runLeds(sm *pio.PIOStateMachine) {
 		).Tick,
 	}
 
-	currentAnimation := "bounce"
-
 	f := func() {
+		curCfg := config.SnapShot()
 		atomic.AddUint32(&count, 1)
 
-		cb := animations[currentAnimation]
+		cb := animations[curCfg.CurrentAnimation]
 		t := float64(time.Now().UnixNano()) / 1e9
 		cb(t, tickDuration.Seconds())
 		writeColors(sm, pixels, strip)

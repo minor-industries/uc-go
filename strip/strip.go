@@ -8,10 +8,10 @@ type Led struct {
 
 type Strip struct {
 	leds []Led
-	env  *cfg.Cfg
+	env  cfg.Config
 }
 
-func NewStrip(env *cfg.Cfg) *Strip {
+func NewStrip(env cfg.Config) *Strip {
 	return &Strip{
 		leds: make([]Led, env.NumLeds),
 		env:  env,
