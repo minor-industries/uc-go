@@ -15,6 +15,7 @@ import (
 	"tinygo/pio"
 	"tinygo/rainbow"
 	"tinygo/strip"
+	"tinygo/util"
 )
 
 const (
@@ -60,6 +61,10 @@ func handleIR(
 		fmt.Println(line + "\r")
 
 		switch msg.Command {
+		case 0x00: // vol-
+			config.ScaleDown()
+		case 0x02: // vol+
+			config.ScaleUp()
 		case 0x10: // 1
 			config.SetAnimation("rainbow1")
 		case 0x11: // 2
@@ -130,27 +135,19 @@ func runLeds(
 	}
 }
 
-func clamp(min, x, max float64) float64 {
-	if x < min {
-		return min
-	}
-
-	if x > max {
-		return max
-	}
-
-	return x
-}
-
 func writeColors(
 	sm *pio.PIOStateMachine,
 	pixels []color.RGBA,
 	st *strip.Strip,
 ) {
+	scale := func(x float64) uint8 {
+		return uint8(util.Clamp(0, x, 1.0) * ledMaxLevel * 255.0)
+	}
+
 	st.Each(func(i int, led *strip.Led) {
-		pixels[i].R = uint8(clamp(0, led.R, 1.0) * ledMaxLevel * 255.0)
-		pixels[i].G = uint8(clamp(0, led.G, 1.0) * ledMaxLevel * 255.0)
-		pixels[i].B = uint8(clamp(0, led.B, 1.0) * ledMaxLevel * 255.0)
+		pixels[i].R = scale(led.R)
+		pixels[i].G = scale(led.G)
+		pixels[i].B = scale(led.B)
 	})
 
 	leds.Write(sm, pixels)
