@@ -92,8 +92,12 @@ func runLeds(sm *pio.PIOStateMachine) {
 		writeColors(sm, pixels, strip)
 	}
 
-	for range time.NewTicker(tickDuration).C {
-		f()
+	ticker := time.NewTicker(tickDuration)
+	for {
+		select {
+		case <-ticker.C:
+			f()
+		}
 	}
 }
 
