@@ -22,39 +22,49 @@ const (
 )
 
 func main() {
-	logs := make(chan irremote.Data, 10)
-
-	ir.Main(func(data irremote.Data) {
-		logs <- data
-	})
-
-	go func() {
-		for log := range logs {
-			line := fmt.Sprintf(
-				"0x%02x, 0x%02x, 0x%02x 0x%02x",
-				log.Code,
-				log.Flags,
-				log.Command,
-				log.Address,
-			)
-			fmt.Println(line + "\r")
-		}
-	}()
-
-	sm := leds.Setup()
-	runLeds(sm)
-}
-
-func runLeds(sm *pio.PIOStateMachine) {
 	config := &cfg.SyncConfig{
 		Config: cfg.Config{
 			CurrentAnimation: "rainbow1",
 			NumLeds:          150,
 			StartIndex:       0,
 			Length:           5.0,
+			Scale:            0.5,
+			MinScale:         0.3,
+			ScaleIncr:        0.02,
 		},
 	}
 
+	irMsg := make(chan irremote.Data, 10)
+	ir.Main(func(data irremote.Data) {
+		irMsg <- data
+	})
+
+	go handleIR(config, irMsg)
+
+	sm := leds.Setup()
+	runLeds(config, sm)
+}
+
+func handleIR(
+	config *cfg.SyncConfig,
+	msgs chan irremote.Data,
+) {
+	for msg := range msgs {
+		line := fmt.Sprintf(
+			"0x%02x, 0x%02x, 0x%02x 0x%02x",
+			msg.Code,
+			msg.Flags,
+			msg.Command,
+			msg.Address,
+		)
+		fmt.Println(line + "\r")
+	}
+}
+
+func runLeds(
+	config *cfg.SyncConfig,
+	sm *pio.PIOStateMachine,
+) {
 	pixels := make([]color.RGBA, 150)
 
 	strip := strip.NewStrip(config.SnapShot())

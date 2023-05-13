@@ -60,5 +60,6 @@ func (s *Strip) Each(cb func(i int, led *Led)) {
 func (s *Strip) Tx(x float64) int {
 	// TODO: very strip specific (needs config, etc)
 	numLeds := float64(len(s.leds) - s.env.StartIndex)
-	return int(numLeds*(x)/s.env.Length) + s.env.StartIndex
+	length := float64(s.env.Length)
+	return int(numLeds*(x)/length) + s.env.StartIndex
 }
