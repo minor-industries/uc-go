@@ -51,3 +51,10 @@ func (sc *SyncConfig) ScaleDown() {
 	c := sc.Config
 	c.Scale = util.Clamp(c.MinScale, c.Scale-c.ScaleIncr, 1.0)
 }
+
+func (sc *SyncConfig) SetAnimation(s string) {
+	sc.lock.Lock()
+	defer sc.lock.Unlock()
+
+	sc.Config.CurrentAnimation = s
+}

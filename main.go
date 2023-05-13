@@ -58,6 +58,15 @@ func handleIR(
 			msg.Address,
 		)
 		fmt.Println(line + "\r")
+
+		switch msg.Command {
+		case 0x10: // 1
+			config.SetAnimation("rainbow1")
+		case 0x11: // 2
+			config.SetAnimation("rainbow2")
+		case 0x12: // 2
+			config.SetAnimation("bounce")
+		}
 	}
 }
 
