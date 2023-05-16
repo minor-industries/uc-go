@@ -3,14 +3,17 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"image/color"
+	"os"
 	"sync/atomic"
 	"time"
 	"tinygo.org/x/drivers/irremote"
 	"tinygo/bounce"
 	"tinygo/cfg"
 	"tinygo/exe/ir"
+	"tinygo/framing"
 	"tinygo/leds"
 	"tinygo/pio"
 	"tinygo/rainbow"
@@ -56,7 +59,14 @@ func handleIR(
 			msg.Command,
 			msg.Address,
 		)
-		fmt.Println(line + "\r")
+
+		frame := framing.Encode([]byte(line))
+
+		framing.Decode(bytes.NewBuffer(nil), func(i []byte) {
+
+		})
+
+		_, _ = os.Stdout.Write(frame)
 
 		switch msg.Command {
 		case 0x00: // vol-
