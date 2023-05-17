@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"image/color"
 	"os"
@@ -36,6 +35,8 @@ func main() {
 		ScaleIncr:        0.02,
 	})
 
+	go decodeFrames()
+
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {
 		irMsg <- data
@@ -45,6 +46,21 @@ func main() {
 
 	sm := leds.Setup()
 	runLeds(config, sm)
+}
+
+func decodeFrames() {
+	ch := make(chan []byte, 10)
+
+	go func() {
+		framing.Decode(os.Stdin, func(msg []byte) {
+			ch <- msg
+		})
+	}()
+
+	for msg := range ch {
+		reply := fmt.Sprintf("got frame: [%s]", msg)
+		os.Stdout.Write(framing.Encode([]byte(reply)))
+	}
 }
 
 func handleIR(
@@ -61,11 +77,6 @@ func handleIR(
 		)
 
 		frame := framing.Encode([]byte(line))
-
-		framing.Decode(bytes.NewBuffer(nil), func(i []byte) {
-
-		})
-
 		_, _ = os.Stdout.Write(frame)
 
 		switch msg.Command {
@@ -106,7 +117,7 @@ func runLeds(
 				time.Now().String(),
 				float64(count)/dt.Seconds(),
 			)
-			fmt.Printf(line + "\r\n")
+			os.Stdout.Write(framing.Encode([]byte(line)))
 		}
 	}()
 
