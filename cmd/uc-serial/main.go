@@ -5,7 +5,7 @@ import (
 	"github.com/tarm/serial"
 	"path/filepath"
 	"time"
-	"uc-go/framing"
+	"uc-go/protocol/framing"
 )
 
 func main() {
