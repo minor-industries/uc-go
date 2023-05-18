@@ -3,14 +3,12 @@ package app
 import (
 	"fmt"
 	"image/color"
-	"os"
 	"sync/atomic"
 	"time"
 	"uc-go/bounce"
 	"uc-go/cfg"
 	"uc-go/leds"
 	"uc-go/pio"
-	"uc-go/protocol/framing"
 	"uc-go/rainbow"
 	"uc-go/strip"
 	"uc-go/util"
@@ -43,7 +41,7 @@ func RunLeds(
 				time.Now().String(),
 				float64(count)/dt.Seconds(),
 			)
-			os.Stdout.Write(framing.Encode([]byte(line)))
+			log(line)
 		}
 	}()
 

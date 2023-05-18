@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 	"uc-go/protocol/framing"
+	"uc-go/protocol/rpc"
 )
 
 func main() {
@@ -35,6 +36,17 @@ func main() {
 
 	err = framing.Decode(device, func(frame []byte) {
 		fmt.Printf("got frame: [%s]\n", frame)
+
+		rpcMsg := &rpc.Request{}
+		_, err := rpcMsg.UnmarshalMsg(frame)
+		noErr(err)
+
+		switch rpcMsg.Method {
+		case "log":
+			fmt.Println("got log")
+		default:
+			fmt.Println("unknown message: " + rpcMsg.Method)
+		}
 	})
 	noErr(err)
 }
