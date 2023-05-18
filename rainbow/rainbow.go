@@ -2,8 +2,8 @@ package rainbow
 
 import (
 	"math"
-	"tinygo/noise/fixed"
-	"tinygo/strip"
+	"uc-go/noise/fixed"
+	"uc-go/strip"
 )
 
 const (

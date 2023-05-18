@@ -2,7 +2,7 @@ package cfg
 
 import (
 	"sync"
-	"tinygo/util"
+	"uc-go/util"
 )
 
 type Config struct {

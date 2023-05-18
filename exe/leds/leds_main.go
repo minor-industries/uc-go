@@ -6,9 +6,9 @@ import (
 	"machine"
 	"time"
 	"tinygo.org/x/drivers/ws2812"
-	"tinygo/bounce"
-	"tinygo/cfg"
-	"tinygo/strip"
+	"uc-go/bounce"
+	"uc-go/cfg"
+	"uc-go/strip"
 )
 
 const (

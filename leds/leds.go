@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"machine"
-	"tinygo/pio"
+	"uc-go/pio"
 )
 
 func tightLoopContents() {}

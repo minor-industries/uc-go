@@ -7,7 +7,7 @@ package leds
 
 import (
 	"machine"
-	"tinygo/pio"
+	"uc-go/pio"
 )
 
 // ws2812

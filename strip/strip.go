@@ -1,6 +1,6 @@
 package strip
 
-import "tinygo/cfg"
+import "uc-go/cfg"
 
 type Led struct {
 	R, G, B float32

@@ -1,6 +1,8 @@
-module tinygo
+module uc-go
 
 go 1.19
+
+replace github.com/cacktopus/theheads => ../heads
 
 require (
 	github.com/pkg/errors v0.9.1

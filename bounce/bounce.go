@@ -2,7 +2,7 @@ package bounce
 
 import (
 	"math"
-	"tinygo/strip"
+	"uc-go/strip"
 )
 
 type App struct {
