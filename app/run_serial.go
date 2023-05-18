@@ -17,6 +17,6 @@ func DecodeFrames() {
 
 	for msg := range ch {
 		reply := fmt.Sprintf("got frame: [%s]", msg)
-		os.Stdout.Write(framing.Encode([]byte(reply)))
+		log(reply)
 	}
 }

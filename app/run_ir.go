@@ -2,10 +2,8 @@ package app
 
 import (
 	"fmt"
-	"os"
 	"tinygo.org/x/drivers/irremote"
 	"uc-go/cfg"
-	"uc-go/protocol/framing"
 )
 
 func HandleIR(
@@ -21,8 +19,7 @@ func HandleIR(
 			msg.Address,
 		)
 
-		frame := framing.Encode([]byte(line))
-		_, _ = os.Stdout.Write(frame)
+		log(line)
 
 		switch msg.Command {
 		case 0x00: // vol-
