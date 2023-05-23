@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"image/color"
 	"machine"
+	"sync/atomic"
 	"uc-go/pio"
 )
 
 func tightLoopContents() {}
+
+var TxFullCounter int64
 
 func Setup() *pio.PIOStateMachine {
 	p := pio.PIO0
@@ -28,6 +31,7 @@ func Write(sm *pio.PIOStateMachine, pixels []color.RGBA) {
 
 	for _, pixel := range pixels {
 		for sm.PIO.Device.GetFSTAT_TXFULL()&smTxFullMask != 0 {
+			atomic.AddInt64(&TxFullCounter, 1)
 			tightLoopContents()
 		}
 		r := uint32(pixel.R)

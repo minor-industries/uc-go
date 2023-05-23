@@ -36,10 +36,11 @@ func RunLeds(
 			count := atomic.LoadUint32(&count)
 			dt := time.Now().Sub(t0)
 			line := fmt.Sprintf(
-				"count = %d, t=%s, fps=%0.02f",
+				"count = %d, t=%s, fps=%0.02f, txfull=%d",
 				count,
 				time.Now().String(),
 				float64(count)/dt.Seconds(),
+				atomic.LoadInt64(&leds.TxFullCounter),
 			)
 			log(line)
 		}
