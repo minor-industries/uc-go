@@ -8,6 +8,8 @@ import (
 	"uc-go/cfg"
 	"uc-go/exe/ir"
 	"uc-go/leds"
+	"uc-go/storage"
+	"uc-go/util"
 )
 
 func main() {
@@ -21,7 +23,10 @@ func main() {
 		ScaleIncr:        0.02,
 	})
 
-	go app.DecodeFrames()
+	storedLogs := util.NewStoredLogs(100)
+	storage.Setup(storedLogs)
+
+	go app.DecodeFrames(storedLogs)
 
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {

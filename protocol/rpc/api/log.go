@@ -5,3 +5,5 @@ package api
 type LogRequest struct {
 	Message string `msg:"message"`
 }
+
+type Empty struct{}
