@@ -4,11 +4,13 @@ go 1.19
 
 replace github.com/cacktopus/theheads => ../heads
 
+replace tinygo.org/x/tinyfs => ../tinyfs
+
 require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
 	github.com/tinylib/msgp v1.1.8
-	tinygo.org/x/drivers v0.23.0
+	tinygo.org/x/drivers v0.24.0
 	tinygo.org/x/tinyfs v0.2.0
 )
 

@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"machine"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/util"
@@ -22,7 +21,6 @@ func Setup(storedLogs *util.StoredLogs) {
 
 	led := machine.LED
 	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	led.High()
 
 	storedLogs.Log(fmt.Sprintf(
 		"lsblk start=0x%x, end=0x%x",
@@ -30,10 +28,12 @@ func Setup(storedLogs *util.StoredLogs) {
 		machine.FlashDataEnd(),
 	))
 
-	n, err := lfs.Size()
-	if err != nil {
-		storedLogs.Log(fmt.Sprintf("size=%d", n))
-	} else {
-		storedLogs.Log(errors.Wrap(err, "error: size").Error())
-	}
+	_ = lfs // TODO: remove
+
+	//n, err := lfs.Size()
+	//if err != nil {
+	//	storedLogs.Log(fmt.Sprintf("size=%d", n))
+	//} else {
+	//	storedLogs.Log(errors.Wrap(err, "error: size").Error())
+	//}
 }
