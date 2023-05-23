@@ -7,5 +7,9 @@ import (
 )
 
 func log(msg string) {
-	_ = rpc.Send(&api.LogRequest{Message: msg}, os.Stdout)
+	_ = rpc.Send(
+		os.Stdout,
+		"log",
+		&api.LogRequest{Message: msg},
+	)
 }

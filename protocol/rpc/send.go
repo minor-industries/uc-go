@@ -7,21 +7,29 @@ import (
 	"uc-go/protocol/framing"
 )
 
-func Send(req msgp.Marshaler, w io.Writer) error {
-	//req := &api.LogRequest{Message: msg}
-	marshal, err := req.MarshalMsg(nil)
-	if err != nil {
-		return errors.Wrap(err, "marshal req")
+func Send(
+	w io.Writer,
+	method string,
+	req msgp.Marshaler,
+) error {
+	var body []byte
+	var err error
+
+	if req != nil {
+		body, err = req.MarshalMsg(nil)
+		if err != nil {
+			return errors.Wrap(err, "marshal req")
+		}
 	}
 
 	rpcMsg := &Request{
-		Method: "log",
-		Body:   marshal,
+		Method: method,
+		Body:   body,
 	}
 
 	rpcMarshal, err := rpcMsg.MarshalMsg(nil)
 	if err != nil {
-		return errors.Wrap(err, "marshal ")
+		return errors.Wrap(err, "marshal")
 	}
 
 	frame := framing.Encode(rpcMarshal)

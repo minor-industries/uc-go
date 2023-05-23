@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"os"
 	"uc-go/protocol/framing"
@@ -19,9 +18,6 @@ func DecodeFrames(storedLogs *util.StoredLogs) {
 	}()
 
 	for msg := range ch {
-		reply := fmt.Sprintf("got frame: [%s]", msg)
-		log(reply)
-
 		rpcMsg := &rpc.Request{}
 		_, err := rpcMsg.UnmarshalMsg(msg)
 		if err != nil {
@@ -33,7 +29,7 @@ func DecodeFrames(storedLogs *util.StoredLogs) {
 		switch rpcMsg.Method {
 		case "dump-stored-logs":
 			storedLogs.Each(func(s string) {
-				log(s)
+				log("stored: " + s)
 			})
 
 		default:

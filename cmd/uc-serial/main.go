@@ -29,8 +29,7 @@ func main() {
 
 	go func() {
 		for range time.NewTicker(time.Second).C {
-			msg := "hello from " + time.Now().String()
-			_, err := device.Write(framing.Encode([]byte(msg)))
+			err := rpc.Send(device, "dump-stored-logs", nil)
 			noErr(err)
 		}
 	}()
