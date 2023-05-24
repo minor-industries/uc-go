@@ -39,8 +39,6 @@ func run(storedLogs *util.StoredLogs) error {
 
 	config := cfg.NewSyncConfig(*loadedCfg)
 
-	go app.DecodeFrames(storedLogs)
-
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {
 		irMsg <- data
@@ -56,6 +54,7 @@ func run(storedLogs *util.StoredLogs) error {
 
 func main() {
 	storedLogs := util.NewStoredLogs(100)
+	go app.DecodeFrames(storedLogs)
 
 	err := run(storedLogs)
 	if err != nil {
