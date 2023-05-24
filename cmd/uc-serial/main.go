@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/tarm/serial"
 	"path/filepath"
@@ -34,25 +35,39 @@ func main() {
 		}
 	}()
 
-	err = framing.Decode(device, func(frame []byte) {
-		//fmt.Printf("got frame: [%s]\n", frame)
+	go func() {
+		err = framing.Decode(device, func(frame []byte) {
+			//fmt.Printf("got frame: [%s]\n", frame)
 
-		rpcMsg := &rpc.Request{}
-		_, err := rpcMsg.UnmarshalMsg(frame)
-		noErr(err)
-
-		switch rpcMsg.Method {
-		case "log":
-			msg := &api.LogRequest{}
-			_, err := msg.UnmarshalMsg(rpcMsg.Body)
+			rpcMsg := &rpc.Request{}
+			_, err := rpcMsg.UnmarshalMsg(frame)
 			noErr(err)
-			fmt.Println("got log:", msg.Message)
 
-		default:
-			fmt.Println("unknown message: " + rpcMsg.Method)
-		}
-	})
+			switch rpcMsg.Method {
+			case "log":
+				msg := &api.LogRequest{}
+				_, err := msg.UnmarshalMsg(rpcMsg.Body)
+				noErr(err)
+				fmt.Println("got log:", msg.Message)
+
+			case "show-config":
+				//msg := &cfg.Config{}
+				//_, err := msg.UnmarshalMsg(rpcMsg.Body)
+				//noErr(err)
+				//fmt.Println("config:", spew.Sdump(msg))
+				fmt.Println("config:", hex.Dump(rpcMsg.Body))
+
+			default:
+				fmt.Println("unknown message: " + rpcMsg.Method)
+			}
+		})
+		noErr(err)
+	}()
+
+	err = rpc.Send(device, "get-config", nil)
 	noErr(err)
+
+	select {}
 }
 
 func noErr(err error) {

@@ -2,7 +2,6 @@ package cfg
 
 import (
 	"sync"
-	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/util"
 )
 
@@ -51,15 +50,4 @@ func (sc *SyncConfig) SetAnimation(s string) {
 	defer sc.lock.Unlock()
 
 	sc.config.CurrentAnimation = s
-}
-
-func (sc *SyncConfig) Save(
-	logs *util.StoredLogs,
-	lfs *littlefs.LFS,
-	name string,
-) error {
-	// TODO: only save if content is different
-
-	ss := sc.SnapShot()
-	return ss.WriteConfig(logs, lfs, name)
 }

@@ -32,6 +32,9 @@ func DecodeFrames(storedLogs *util.StoredLogs) {
 				log("stored: " + s)
 			})
 
+		case "get-config":
+			rpc.Send(os.Stdout, "show-config", nil)
+
 		default:
 			storedLogs.Log("unknown method: " + rpcMsg.Method)
 		}

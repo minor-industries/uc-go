@@ -6,6 +6,7 @@ import (
 	"tinygo.org/x/drivers/irremote"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/cfg"
+	"uc-go/storage"
 	"uc-go/util"
 )
 
@@ -39,7 +40,8 @@ func HandleIR(
 		case 0x12: // 2
 			config.SetAnimation("bounce")
 		case 0x0E:
-			if err := config.Save(logs, lfs, configFileName); err != nil {
+			ss := config.SnapShot()
+			if err := storage.WriteMsgp(logs, lfs, &ss, configFileName); err != nil {
 				logs.Error(errors.Wrap(err, "save config"))
 			}
 		}

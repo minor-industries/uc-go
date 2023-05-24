@@ -34,10 +34,10 @@ func run(storedLogs *util.StoredLogs) error {
 		ScaleIncr:        0.02,
 	}
 
-	err = loadConfig(storedLogs, lfs, loadedCfg)
-	if err != nil {
-		return errors.Wrap(err, "load config")
-	}
+	//err = loadConfig(storedLogs, lfs, loadedCfg)
+	//if err != nil {
+	//	return errors.Wrap(err, "load config")
+	//}
 
 	config := cfg.NewSyncConfig(*loadedCfg)
 
@@ -81,7 +81,8 @@ const (
 func loadConfig(logs *util.StoredLogs, lfs *littlefs.LFS, c *cfg.Config) error {
 	_, err := lfs.Stat(configFile)
 	if err != nil {
-		return c.WriteConfig(logs, lfs, configFile)
+		// TODO: this will currently fail (the first time) as WriteMsgp reads old file content
+		return storage.WriteMsgp(logs, lfs, c, configFile)
 	}
 
 	content, err := storage.ReadFile(lfs, configFile)
@@ -90,7 +91,7 @@ func loadConfig(logs *util.StoredLogs, lfs *littlefs.LFS, c *cfg.Config) error {
 	}
 
 	if len(content) == 0 {
-		return c.WriteConfig(logs, lfs, configFile)
+		return storage.WriteMsgp(logs, lfs, c, configFile)
 	} else {
 		_, err = c.UnmarshalMsg(content)
 		if err != nil {

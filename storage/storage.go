@@ -1,8 +1,10 @@
 package storage
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/tinylib/msgp/msgp"
 	"io"
 	"machine"
 	"os"
@@ -109,5 +111,35 @@ func WriteFile(
 		return errors.Wrap(err, "write")
 	}
 
+	return nil
+}
+
+func WriteMsgp(
+	logs *util.StoredLogs,
+	lfs *littlefs.LFS,
+	msg msgp.Marshaler,
+	filename string,
+) error {
+	newContent, err := msg.MarshalMsg(nil)
+	if err != nil {
+		return errors.Wrap(err, "marshal")
+	}
+
+	oldContent, err := ReadFile(lfs, filename)
+	if err != nil {
+		return errors.Wrap(err, "readfile")
+	}
+
+	if bytes.Equal(oldContent, newContent) {
+		logs.Log("content was identical, skipping write")
+		return nil
+	}
+
+	err = WriteFile(lfs, filename, newContent)
+	if err != nil {
+		return errors.Wrap(err, "writefile")
+	}
+
+	logs.Log("wrote configfile")
 	return nil
 }
