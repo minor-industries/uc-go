@@ -41,8 +41,6 @@ func HandleIR(
 		case 0x0E:
 			if err := config.Save(logs, lfs, configFileName); err != nil {
 				logs.Error(errors.Wrap(err, "save config"))
-			} else {
-				logs.Log("saved config")
 			}
 		}
 	}

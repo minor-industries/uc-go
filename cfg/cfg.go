@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"bytes"
 	"github.com/pkg/errors"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/storage"
@@ -28,6 +29,16 @@ func (c *Config) WriteConfig(
 	newContent, err := c.MarshalMsg(nil)
 	if err != nil {
 		return errors.Wrap(err, "marshal")
+	}
+
+	oldContent, err := storage.ReadFile(lfs, filename)
+	if err != nil {
+		return errors.Wrap(err, "readfile")
+	}
+
+	if bytes.Equal(oldContent, newContent) {
+		logs.Log("content was identical, skipping write")
+		return nil
 	}
 
 	err = storage.WriteFile(lfs, filename, newContent)

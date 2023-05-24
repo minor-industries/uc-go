@@ -42,7 +42,7 @@ func RunLeds(
 				float64(count)/dt.Seconds(),
 				atomic.LoadInt64(&leds.TxFullCounter),
 			)
-			log(line)
+			_ = line //log(line)
 		}
 	}()
 

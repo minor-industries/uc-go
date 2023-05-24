@@ -24,7 +24,7 @@ func DecodeFrames(storedLogs *util.StoredLogs) {
 			storedLogs.Log(errors.Wrap(err, "error: unmarshal rpc").Error())
 		}
 
-		storedLogs.Log("got rpc: " + rpcMsg.Method)
+		//storedLogs.Log("got rpc: " + rpcMsg.Method)
 
 		switch rpcMsg.Method {
 		case "dump-stored-logs":
