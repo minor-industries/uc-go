@@ -3,7 +3,9 @@ package storage
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"io"
 	"machine"
+	"os"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/util"
 )
@@ -71,4 +73,41 @@ func mount(logs *util.StoredLogs, lfs *littlefs.LFS) (err error) {
 		}
 	}
 	return
+}
+
+func ReadFile(
+	lfs *littlefs.LFS,
+	name string,
+) ([]byte, error) {
+	fp, err := lfs.Open(name)
+	if err != nil {
+		return nil, errors.Wrap(err, "open")
+	}
+	defer fp.Close()
+
+	content, err := io.ReadAll(fp)
+	if err != nil {
+		return nil, errors.Wrap(err, "readall")
+	}
+
+	return content, nil
+}
+
+func WriteFile(
+	lfs *littlefs.LFS,
+	name string,
+	content []byte,
+) error {
+	fp, err := lfs.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC)
+	if err != nil {
+		return errors.Wrap(err, "openfile")
+	}
+	defer fp.Close()
+
+	_, err = fp.Write(content)
+	if err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
 }

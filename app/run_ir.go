@@ -2,13 +2,19 @@ package app
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
+	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/cfg"
+	"uc-go/util"
 )
 
 func HandleIR(
+	logs *util.StoredLogs,
+	lfs *littlefs.LFS,
 	config *cfg.SyncConfig,
 	msgs chan irremote.Data,
+	configFileName string,
 ) {
 	for msg := range msgs {
 		line := fmt.Sprintf(
@@ -32,6 +38,12 @@ func HandleIR(
 			config.SetAnimation("rainbow2")
 		case 0x12: // 2
 			config.SetAnimation("bounce")
+		case 0x0E:
+			if err := config.Save(logs, lfs, configFileName); err != nil {
+				logs.Error(errors.Wrap(err, "save config"))
+			} else {
+				logs.Log("saved config")
+			}
 		}
 	}
 }

@@ -4,8 +4,6 @@ package main
 
 import (
 	"github.com/pkg/errors"
-	"io"
-	"os"
 	"tinygo.org/x/drivers/irremote"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/app"
@@ -48,7 +46,13 @@ func run(storedLogs *util.StoredLogs) error {
 		irMsg <- data
 	})
 
-	go app.HandleIR(config, irMsg)
+	go app.HandleIR(
+		storedLogs,
+		lfs,
+		config,
+		irMsg,
+		configFile,
+	)
 
 	sm := leds.Setup()
 	go app.RunLeds(config, sm)
@@ -74,49 +78,19 @@ const (
 	configFile = "/cfg.msgp"
 )
 
-func readFile(lfs *littlefs.LFS, name string) ([]byte, error) {
-	fp, err := lfs.Open("/cfg.msgp")
-	if err != nil {
-		return nil, errors.Wrap(err, "open")
-	}
-	defer fp.Close()
-
-	content, err := io.ReadAll(fp)
-	if err != nil {
-		return nil, errors.Wrap(err, "readall")
-	}
-
-	return content, nil
-}
-
-func writeFile(lfs *littlefs.LFS, name string, content []byte) error {
-	fp, err := lfs.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC)
-	if err != nil {
-		return errors.Wrap(err, "openfile")
-	}
-	defer fp.Close()
-
-	_, err = fp.Write(content)
-	if err != nil {
-		return errors.Wrap(err, "write")
-	}
-
-	return nil
-}
-
 func loadConfig(logs *util.StoredLogs, lfs *littlefs.LFS, c *cfg.Config) error {
 	_, err := lfs.Stat(configFile)
 	if err != nil {
-		return writeConfig(logs, lfs, c)
+		return c.WriteConfig(logs, lfs, configFile)
 	}
 
-	content, err := readFile(lfs, configFile)
+	content, err := storage.ReadFile(lfs, configFile)
 	if err != nil {
 		return errors.Wrap(err, "readfile")
 	}
 
 	if len(content) == 0 {
-		return writeConfig(logs, lfs, c)
+		return c.WriteConfig(logs, lfs, configFile)
 	} else {
 		_, err = c.UnmarshalMsg(content)
 		if err != nil {
@@ -126,24 +100,5 @@ func loadConfig(logs *util.StoredLogs, lfs *littlefs.LFS, c *cfg.Config) error {
 		logs.Log("loaded configfile")
 	}
 
-	return nil
-}
-
-func writeConfig(
-	logs *util.StoredLogs,
-	lfs *littlefs.LFS,
-	c *cfg.Config,
-) error {
-	newContent, err := c.MarshalMsg(nil)
-	if err != nil {
-		return errors.Wrap(err, "marshal")
-	}
-
-	err = writeFile(lfs, configFile, newContent)
-	if err != nil {
-		return errors.Wrap(err, "writefile")
-	}
-
-	logs.Log("wrote configfile")
 	return nil
 }
