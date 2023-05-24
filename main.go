@@ -22,6 +22,10 @@ func run(storedLogs *util.StoredLogs) error {
 		return errors.Wrap(err, "setup storage")
 	}
 
+	if lfs == nil {
+		return errors.New("no lfs")
+	}
+
 	loadedCfg := &cfg.Config{
 		CurrentAnimation: "rainbow1",
 		NumLeds:          150,

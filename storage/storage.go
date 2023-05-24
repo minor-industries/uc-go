@@ -30,16 +30,15 @@ func Setup(storedLogs *util.StoredLogs) (*littlefs.LFS, error) {
 		machine.FlashDataEnd(),
 	))
 
-	err := lfs.Format()
-	if err != nil {
-		return nil, errors.Wrap(err, "format")
-	}
-
-	err = lfs.Mount()
+	//err := lfs.Format()
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "format")
+	//}
+	//
+	err := lfs.Mount()
 	if err != nil {
 		return nil, errors.Wrap(err, "mount")
 	}
-
 	storedLogs.Log("mounted")
 
 	{
