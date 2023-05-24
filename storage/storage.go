@@ -14,7 +14,7 @@ var (
 	filesystem  = littlefs.New(blockDevice)
 )
 
-func Setup(storedLogs *util.StoredLogs) error {
+func Setup(storedLogs *util.StoredLogs) (*littlefs.LFS, error) {
 	lfs := filesystem.Configure(&littlefs.Config{
 		CacheSize:     512,
 		LookaheadSize: 512,
@@ -32,43 +32,43 @@ func Setup(storedLogs *util.StoredLogs) error {
 
 	err := lfs.Format()
 	if err != nil {
-		return errors.Wrap(err, "format")
+		return nil, errors.Wrap(err, "format")
 	}
 
 	err = lfs.Mount()
 	if err != nil {
-		return errors.Wrap(err, "mount")
+		return nil, errors.Wrap(err, "mount")
 	}
 
 	storedLogs.Log("mounted")
 
 	n, err := lfs.Size()
 	if err != nil {
-		return errors.Wrap(err, "size")
+		return nil, errors.Wrap(err, "size")
 	}
 
 	storedLogs.Log(fmt.Sprintf("size = %d", n))
 
 	file, err := lfs.OpenFile("/cfg.msgp", os.O_CREATE)
 	if err != nil {
-		return errors.Wrap(err, "create")
+		return nil, errors.Wrap(err, "create")
 	}
 
 	storedLogs.Log(fmt.Sprintf("file= %v", file))
 
 	root, err := lfs.Open("/")
 	if err != nil {
-		return errors.Wrap(err, "open")
+		return nil, errors.Wrap(err, "open")
 	}
 
 	infos, err := root.Readdir(0)
 	if err != nil {
-		return errors.Wrap(err, "readdir")
+		return nil, errors.Wrap(err, "readdir")
 	}
 
 	for _, info := range infos {
 		storedLogs.Log(fmt.Sprintf("file: %s %d", info.Name(), info.Size()))
 	}
 
-	return nil
+	return lfs, nil
 }
