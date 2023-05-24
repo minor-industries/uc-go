@@ -56,5 +56,19 @@ func Setup(storedLogs *util.StoredLogs) error {
 
 	storedLogs.Log(fmt.Sprintf("file= %v", file))
 
+	root, err := lfs.Open("/")
+	if err != nil {
+		return errors.Wrap(err, "open")
+	}
+
+	infos, err := root.Readdir(0)
+	if err != nil {
+		return errors.Wrap(err, "readdir")
+	}
+
+	for _, info := range infos {
+		storedLogs.Log(fmt.Sprintf("file: %s %d", info.Name(), info.Size()))
+	}
+
 	return nil
 }
