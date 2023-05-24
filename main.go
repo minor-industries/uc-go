@@ -83,7 +83,7 @@ func readFile(lfs *littlefs.LFS, name string) ([]byte, error) {
 
 	content, err := io.ReadAll(fp)
 	if err != nil {
-		return nil, errors.Wrap(err, "read all")
+		return nil, errors.Wrap(err, "readall")
 	}
 
 	return content, nil
@@ -105,23 +105,18 @@ func writeFile(lfs *littlefs.LFS, name string, content []byte) error {
 }
 
 func loadConfig(logs *util.StoredLogs, lfs *littlefs.LFS, c *cfg.Config) error {
+	_, err := lfs.Stat(configFile)
+	if err != nil {
+		return writeConfig(logs, lfs, c)
+	}
+
 	content, err := readFile(lfs, configFile)
 	if err != nil {
-		return errors.Wrap(err, "read all")
+		return errors.Wrap(err, "readfile")
 	}
 
 	if len(content) == 0 {
-		newContent, err := c.MarshalMsg(nil)
-		if err != nil {
-			return errors.Wrap(err, "marshal")
-		}
-
-		err = writeFile(lfs, configFile, newContent)
-		if err != nil {
-			return errors.Wrap(err, "writefile")
-		}
-
-		logs.Log("wrote configfile")
+		return writeConfig(logs, lfs, c)
 	} else {
 		_, err = c.UnmarshalMsg(content)
 		if err != nil {
@@ -131,5 +126,24 @@ func loadConfig(logs *util.StoredLogs, lfs *littlefs.LFS, c *cfg.Config) error {
 		logs.Log("loaded configfile")
 	}
 
+	return nil
+}
+
+func writeConfig(
+	logs *util.StoredLogs,
+	lfs *littlefs.LFS,
+	c *cfg.Config,
+) error {
+	newContent, err := c.MarshalMsg(nil)
+	if err != nil {
+		return errors.Wrap(err, "marshal")
+	}
+
+	err = writeFile(lfs, configFile, newContent)
+	if err != nil {
+		return errors.Wrap(err, "writefile")
+	}
+
+	logs.Log("wrote configfile")
 	return nil
 }
