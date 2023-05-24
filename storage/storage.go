@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"machine"
-	"os"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/util"
 )
@@ -30,23 +29,11 @@ func Setup(storedLogs *util.StoredLogs) (*littlefs.LFS, error) {
 		machine.FlashDataEnd(),
 	))
 
-	//err := lfs.Format()
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "format")
-	//}
-	//
-	err := lfs.Mount()
-	if err != nil {
+	if err := mount(storedLogs, lfs); err != nil {
 		return nil, errors.Wrap(err, "mount")
 	}
-	storedLogs.Log("mounted")
 
-	{
-		_, err := lfs.Open("/")
-		if err != nil {
-			return nil, errors.Wrap(err, "open")
-		}
-	}
+	storedLogs.Log("mounted")
 
 	n, err := lfs.Size()
 	if err != nil {
@@ -54,13 +41,6 @@ func Setup(storedLogs *util.StoredLogs) (*littlefs.LFS, error) {
 	}
 
 	storedLogs.Log(fmt.Sprintf("size = %d", n))
-
-	file, err := lfs.OpenFile("/cfg.msgp", os.O_CREATE)
-	if err != nil {
-		return nil, errors.Wrap(err, "create")
-	}
-
-	storedLogs.Log(fmt.Sprintf("file= %v", file))
 
 	root, err := lfs.Open("/")
 	if err != nil {
@@ -77,4 +57,18 @@ func Setup(storedLogs *util.StoredLogs) (*littlefs.LFS, error) {
 	}
 
 	return lfs, nil
+}
+
+func mount(logs *util.StoredLogs, lfs *littlefs.LFS) (err error) {
+	for i := 0; i <= 1; i++ {
+		err = lfs.Mount()
+		if err != nil {
+			if err := lfs.Format(); err != nil {
+				return errors.Wrap(err, "format")
+			}
+			logs.Log("formatted")
+			continue
+		}
+	}
+	return
 }
