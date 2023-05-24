@@ -2,7 +2,9 @@ package storage
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"machine"
+	"os"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/util"
 )
@@ -12,7 +14,7 @@ var (
 	filesystem  = littlefs.New(blockDevice)
 )
 
-func Setup(storedLogs *util.StoredLogs) {
+func Setup(storedLogs *util.StoredLogs) error {
 	lfs := filesystem.Configure(&littlefs.Config{
 		CacheSize:     512,
 		LookaheadSize: 512,
@@ -28,12 +30,31 @@ func Setup(storedLogs *util.StoredLogs) {
 		machine.FlashDataEnd(),
 	))
 
-	_ = lfs // TODO: remove
+	err := lfs.Format()
+	if err != nil {
+		return errors.Wrap(err, "format")
+	}
 
-	//n, err := lfs.Size()
-	//if err != nil {
-	//	storedLogs.Log(fmt.Sprintf("size=%d", n))
-	//} else {
-	//	storedLogs.Log(errors.Wrap(err, "error: size").Error())
-	//}
+	err = lfs.Mount()
+	if err != nil {
+		return errors.Wrap(err, "mount")
+	}
+
+	storedLogs.Log("mounted")
+
+	n, err := lfs.Size()
+	if err != nil {
+		return errors.Wrap(err, "size")
+	}
+
+	storedLogs.Log(fmt.Sprintf("size = %d", n))
+
+	file, err := lfs.OpenFile("/cfg.msgp", os.O_CREATE)
+	if err != nil {
+		return errors.Wrap(err, "create")
+	}
+
+	storedLogs.Log(fmt.Sprintf("file= %v", file))
+
+	return nil
 }

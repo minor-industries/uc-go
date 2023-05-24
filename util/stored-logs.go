@@ -16,6 +16,10 @@ func (sl *StoredLogs) Log(s string) {
 	}
 }
 
+func (sl *StoredLogs) Error(err error) {
+	sl.Log("error: " + err.Error())
+}
+
 func (sl *StoredLogs) Each(cb func(s string)) {
 	for {
 		select {

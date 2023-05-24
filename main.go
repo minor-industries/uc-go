@@ -3,6 +3,7 @@
 package main
 
 import (
+	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
 	"uc-go/app"
 	"uc-go/cfg"
@@ -24,7 +25,10 @@ func main() {
 	})
 
 	storedLogs := util.NewStoredLogs(100)
-	storage.Setup(storedLogs)
+	err := storage.Setup(storedLogs)
+	if err != nil {
+		storedLogs.Error(errors.Wrap(err, "setup storage"))
+	}
 
 	go app.DecodeFrames(storedLogs)
 
