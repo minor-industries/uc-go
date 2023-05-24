@@ -16,32 +16,28 @@ import (
 	"uc-go/util"
 )
 
-func main() {
-	storedLogs := util.NewStoredLogs(100)
+func run(storedLogs *util.StoredLogs) error {
 	lfs, err := storage.Setup(storedLogs)
 	if err != nil {
-		storedLogs.Error(errors.Wrap(err, "setup storage"))
+		return errors.Wrap(err, "setup storage")
 	}
 
-	var config *cfg.SyncConfig
-	{
-		c := &cfg.Config{
-			CurrentAnimation: "rainbow1",
-			NumLeds:          150,
-			StartIndex:       0,
-			Length:           5.0,
-			Scale:            0.5,
-			MinScale:         0.3,
-			ScaleIncr:        0.02,
-		}
-
-		err = loadConfig(storedLogs, lfs, c)
-		if err != nil {
-			storedLogs.Error(errors.Wrap(err, "load config"))
-		}
-
-		config = cfg.NewSyncConfig(*c)
+	loadedCfg := &cfg.Config{
+		CurrentAnimation: "rainbow1",
+		NumLeds:          150,
+		StartIndex:       0,
+		Length:           5.0,
+		Scale:            0.5,
+		MinScale:         0.3,
+		ScaleIncr:        0.02,
 	}
+
+	err = loadConfig(storedLogs, lfs, loadedCfg)
+	if err != nil {
+		return errors.Wrap(err, "load config")
+	}
+
+	config := cfg.NewSyncConfig(*loadedCfg)
 
 	go app.DecodeFrames(storedLogs)
 
@@ -54,6 +50,19 @@ func main() {
 
 	sm := leds.Setup()
 	go app.RunLeds(config, sm)
+
+	select {}
+}
+
+func main() {
+	storedLogs := util.NewStoredLogs(100)
+
+	err := run(storedLogs)
+	if err != nil {
+		storedLogs.Error(errors.Wrap(err, "run exited with error"))
+	} else {
+		storedLogs.Log("run exited")
+	}
 
 	select {}
 }

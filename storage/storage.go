@@ -42,6 +42,13 @@ func Setup(storedLogs *util.StoredLogs) (*littlefs.LFS, error) {
 
 	storedLogs.Log("mounted")
 
+	{
+		_, err := lfs.Open("/")
+		if err != nil {
+			return nil, errors.Wrap(err, "open")
+		}
+	}
+
 	n, err := lfs.Size()
 	if err != nil {
 		return nil, errors.Wrap(err, "size")
