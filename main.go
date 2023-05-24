@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/pkg/errors"
 	"io"
+	"os"
 	"tinygo.org/x/drivers/irremote"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/app"
@@ -34,7 +35,7 @@ func main() {
 			ScaleIncr:        0.02,
 		}
 
-		err = loadConfig(lfs, c)
+		err = loadConfig(storedLogs, lfs, c)
 		if err != nil {
 			storedLogs.Error(errors.Wrap(err, "load config"))
 		}
@@ -57,20 +58,65 @@ func main() {
 	select {}
 }
 
-func loadConfig(lfs *littlefs.LFS, c *cfg.Config) error {
+const (
+	configFile = "/cfg.msgp"
+)
+
+func readFile(lfs *littlefs.LFS, name string) ([]byte, error) {
 	fp, err := lfs.Open("/cfg.msgp")
 	if err != nil {
-		return errors.Wrap(err, "open")
+		return nil, errors.Wrap(err, "open")
 	}
+	defer fp.Close()
 
 	content, err := io.ReadAll(fp)
+	if err != nil {
+		return nil, errors.Wrap(err, "read all")
+	}
+
+	return content, nil
+}
+
+func writeFile(lfs *littlefs.LFS, name string, content []byte) error {
+	fp, err := lfs.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC)
+	if err != nil {
+		return errors.Wrap(err, "openfile")
+	}
+	defer fp.Close()
+
+	_, err = fp.Write(content)
+	if err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func loadConfig(logs *util.StoredLogs, lfs *littlefs.LFS, c *cfg.Config) error {
+	content, err := readFile(lfs, configFile)
 	if err != nil {
 		return errors.Wrap(err, "read all")
 	}
 
-	_, err = c.UnmarshalMsg(content)
-	if err != nil {
-		return errors.Wrap(err, "unmarshal")
+	if len(content) == 0 {
+		newContent, err := c.MarshalMsg(nil)
+		if err != nil {
+			return errors.Wrap(err, "marshal")
+		}
+
+		err = writeFile(lfs, configFile, newContent)
+		if err != nil {
+			return errors.Wrap(err, "writefile")
+		}
+
+		logs.Log("wrote configfile")
+	} else {
+		_, err = c.UnmarshalMsg(content)
+		if err != nil {
+			return errors.Wrap(err, "unmarshal")
+		}
+
+		logs.Log("loaded configfile")
 	}
 
 	return nil
