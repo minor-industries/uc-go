@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"uc-go/noise/f32"
-	"uc-go/noise/f32b"
-	"uc-go/noise/fixed"
+	"uc-go/pkg/noise/f32"
+	"uc-go/pkg/noise/f32b"
+	"uc-go/pkg/noise/fixed"
 )
 
 func TestNoise(t *testing.T) {

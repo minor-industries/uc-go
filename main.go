@@ -8,11 +8,11 @@ import (
 	"tinygo.org/x/drivers/irremote"
 	"uc-go/app"
 	"uc-go/app/cfg"
-	"uc-go/exe/ir"
-	"uc-go/leds"
-	"uc-go/protocol/rpc"
-	"uc-go/storage"
-	"uc-go/util"
+	"uc-go/pkg/ir"
+	"uc-go/pkg/leds"
+	rpc2 "uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/storage"
+	"uc-go/pkg/util"
 	"uc-go/wifi"
 )
 
@@ -55,10 +55,10 @@ func run(a *app.App) error {
 
 func main() {
 	a := &app.App{
-		Logs: rpc.NewQueue(100),
+		Logs: rpc2.NewQueue(100),
 	}
 
-	go rpc.DecodeFrames(a.Logs, a)
+	go rpc2.DecodeFrames(a.Logs, a)
 
 	err := run(a)
 	if err != nil {

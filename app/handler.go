@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/pkg/errors"
 	"os"
-	"uc-go/protocol/rpc"
+	"uc-go/pkg/protocol/rpc"
 )
 
 func (a *App) Handle(method string, body []byte) error {

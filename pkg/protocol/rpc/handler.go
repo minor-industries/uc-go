@@ -3,7 +3,7 @@ package rpc
 import (
 	"github.com/pkg/errors"
 	"os"
-	"uc-go/protocol/framing"
+	"uc-go/pkg/protocol/framing"
 )
 
 type Handler interface {

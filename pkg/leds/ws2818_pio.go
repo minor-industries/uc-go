@@ -7,7 +7,7 @@ package leds
 
 import (
 	"machine"
-	"uc-go/pio"
+	"uc-go/pkg/pio"
 )
 
 // ws2812

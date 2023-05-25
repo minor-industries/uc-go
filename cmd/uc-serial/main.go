@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"time"
 	"uc-go/app/cfg"
-	"uc-go/protocol/framing"
-	"uc-go/protocol/rpc"
-	"uc-go/protocol/rpc/api"
+	"uc-go/pkg/protocol/framing"
+	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/protocol/rpc/api"
 )
 
 var opts struct {

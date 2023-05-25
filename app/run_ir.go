@@ -5,8 +5,8 @@ import (
 	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
 	"uc-go/app/cfg"
-	"uc-go/storage"
-	"uc-go/util"
+	"uc-go/pkg/storage"
+	"uc-go/pkg/util"
 )
 
 func (a *App) HandleIR(

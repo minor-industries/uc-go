@@ -6,12 +6,12 @@ import (
 	"sync/atomic"
 	"time"
 	"uc-go/app/cfg"
-	"uc-go/bounce"
-	"uc-go/leds"
-	"uc-go/pio"
-	"uc-go/rainbow"
-	"uc-go/strip"
-	"uc-go/util"
+	"uc-go/pkg/leds"
+	"uc-go/pkg/leds/animations/bounce"
+	"uc-go/pkg/leds/animations/rainbow"
+	"uc-go/pkg/leds/strip"
+	"uc-go/pkg/pio"
+	util2 "uc-go/pkg/util"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 )
 
 func RunLeds(
-	config *util.SyncConfig[cfg.Config],
+	config *util2.SyncConfig[cfg.Config],
 	sm *pio.PIOStateMachine,
 ) {
 	pixels := make([]color.RGBA, 150)
@@ -87,7 +87,7 @@ func writeColors(
 ) {
 	convert := func(x float32) uint8 {
 		val := x * scale
-		return uint8(util.Clamp(0, val, 1.0) * ledMaxLevel * 255.0)
+		return uint8(util2.Clamp(0, val, 1.0) * ledMaxLevel * 255.0)
 	}
 
 	st.Each(func(i int, led *strip.Led) {

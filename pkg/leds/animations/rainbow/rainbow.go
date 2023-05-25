@@ -2,8 +2,8 @@ package rainbow
 
 import (
 	"math"
-	"uc-go/noise/fixed"
-	"uc-go/strip"
+	"uc-go/pkg/leds/strip"
+	"uc-go/pkg/noise/fixed"
 )
 
 const (

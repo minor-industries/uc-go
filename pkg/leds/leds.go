@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"machine"
 	"sync/atomic"
-	"uc-go/pio"
+	"uc-go/pkg/pio"
 )
 
 func tightLoopContents() {}

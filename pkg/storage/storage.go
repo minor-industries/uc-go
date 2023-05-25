@@ -9,7 +9,7 @@ import (
 	"machine"
 	"os"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/protocol/rpc"
+	"uc-go/pkg/protocol/rpc"
 )
 
 var (

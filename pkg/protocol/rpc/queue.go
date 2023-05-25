@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"github.com/tinylib/msgp/msgp"
-	"uc-go/protocol/rpc/api"
+	"uc-go/pkg/protocol/rpc/api"
 )
 
 type Queue struct {

@@ -3,8 +3,8 @@ package app
 import (
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/app/cfg"
-	"uc-go/protocol/rpc"
-	"uc-go/util"
+	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/util"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
 	"io"
-	"uc-go/protocol/framing"
+	"uc-go/pkg/protocol/framing"
 )
 
 type Req struct {
