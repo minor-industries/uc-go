@@ -10,7 +10,7 @@ import (
 	"uc-go/app/cfg"
 	"uc-go/pkg/ir"
 	"uc-go/pkg/leds"
-	rpc2 "uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/protocol/rpc"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
 	"uc-go/wifi"
@@ -28,7 +28,12 @@ func run(a *app.App) error {
 		return errors.New("no lfs")
 	}
 
-	config, err := loadConfig(a)
+	config, err := storage.LoadConfig[*cfg.Config](
+		a.Lfs,
+		a.Logs,
+		a.ConfigFile(),
+		&cfg.DefaultConfig,
+	)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
@@ -55,10 +60,10 @@ func run(a *app.App) error {
 
 func main() {
 	a := &app.App{
-		Logs: rpc2.NewQueue(100),
+		Logs: rpc.NewQueue(100),
 	}
 
-	go rpc2.DecodeFrames(a.Logs, a)
+	go rpc.DecodeFrames(a.Logs, a)
 
 	err := run(a)
 	if err != nil {
@@ -68,31 +73,4 @@ func main() {
 	}
 
 	select {}
-}
-
-func loadConfig(ap *app.App) (*cfg.Config, error) {
-	initConfig := cfg.DefaultConfig
-
-	_, err := ap.Lfs.Stat(ap.ConfigFile())
-	if err != nil {
-		return &initConfig, storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
-	}
-
-	content, err := storage.ReadFile(ap.Lfs, ap.ConfigFile())
-	if err != nil {
-		return &initConfig, errors.Wrap(err, "readfile")
-	}
-
-	if len(content) == 0 {
-		return &initConfig, storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
-	} else {
-		_, err = initConfig.UnmarshalMsg(content)
-		if err != nil {
-			return &initConfig, errors.Wrap(err, "unmarshal")
-		}
-		ap.Logs.Log("loaded configfile")
-		ap.Logs.Rpc("show-config", &initConfig)
-	}
-
-	return &initConfig, nil
 }
