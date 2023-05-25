@@ -68,9 +68,11 @@ func main() {
 	}()
 
 	go func() {
-		time.Sleep(time.Second)
-		err = rpc.Send(device, "get-config", nil)
-		noErr(err)
+		for {
+			time.Sleep(time.Second)
+			err = rpc.Send(device, "get-config", nil)
+			noErr(err)
+		}
 	}()
 
 	select {}

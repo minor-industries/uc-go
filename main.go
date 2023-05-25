@@ -35,10 +35,10 @@ func run(a *app.App) error {
 		ScaleIncr:        0.02,
 	}
 
-	//err = loadConfig(storedLogs, lfs, loadedCfg)
-	//if err != nil {
-	//	return errors.Wrap(err, "load config")
-	//}
+	err = loadConfig(a)
+	if err != nil {
+		return errors.Wrap(err, "load config")
+	}
 
 	a.Cfg = cfg.NewSyncConfig(*loadedCfg)
 
