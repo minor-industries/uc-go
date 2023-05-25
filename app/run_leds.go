@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"sync/atomic"
 	"time"
+	"uc-go/app/cfg"
 	"uc-go/bounce"
-	"uc-go/cfg"
 	"uc-go/leds"
 	"uc-go/pio"
 	"uc-go/rainbow"
@@ -19,7 +19,7 @@ const (
 )
 
 func RunLeds(
-	config *cfg.SyncConfig,
+	config *util.SyncConfig[cfg.Config],
 	sm *pio.PIOStateMachine,
 ) {
 	pixels := make([]color.RGBA, 150)

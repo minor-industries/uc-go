@@ -7,11 +7,12 @@ import (
 	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
 	"uc-go/app"
-	"uc-go/cfg"
+	"uc-go/app/cfg"
 	"uc-go/exe/ir"
 	"uc-go/leds"
 	"uc-go/protocol/rpc"
 	"uc-go/storage"
+	"uc-go/util"
 	"uc-go/wifi"
 )
 
@@ -32,7 +33,7 @@ func run(a *app.App) error {
 		return errors.Wrap(err, "load config")
 	}
 
-	a.Cfg = cfg.NewSyncConfig(*config)
+	a.Cfg = util.NewSyncConfig(*config)
 
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {

@@ -1,6 +1,8 @@
 package strip
 
-import "uc-go/cfg"
+import (
+	"uc-go/app/cfg"
+)
 
 type Led struct {
 	R, G, B float32

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
+	"uc-go/app/cfg"
 	"uc-go/storage"
+	"uc-go/util"
 )
 
 func (a *App) HandleIR(
@@ -23,15 +25,25 @@ func (a *App) HandleIR(
 
 		switch msg.Command {
 		case 0x00: // vol-
-			a.Cfg.ScaleDown()
+			a.Cfg.Edit(func(c *cfg.Config) {
+				c.Scale = util.Clamp(c.MinScale, c.Scale-c.ScaleIncr, 1.0)
+			})
 		case 0x02: // vol+
-			a.Cfg.ScaleUp()
+			a.Cfg.Edit(func(c *cfg.Config) {
+				c.Scale = util.Clamp(c.MinScale, c.Scale+c.ScaleIncr, 1.0)
+			})
 		case 0x10: // 1
-			a.Cfg.SetAnimation("rainbow1")
+			a.Cfg.Edit(func(c *cfg.Config) {
+				c.CurrentAnimation = "rainbow1"
+			})
 		case 0x11: // 2
-			a.Cfg.SetAnimation("rainbow2")
+			a.Cfg.Edit(func(c *cfg.Config) {
+				c.CurrentAnimation = "rainbow2"
+			})
 		case 0x12: // 2
-			a.Cfg.SetAnimation("bounce")
+			a.Cfg.Edit(func(c *cfg.Config) {
+				c.CurrentAnimation = "bounce"
+			})
 		case 0x0E:
 			ss := a.Cfg.SnapShot()
 			if err := storage.WriteMsgp(a.Logs, a.Lfs, &ss, configFile); err != nil {
