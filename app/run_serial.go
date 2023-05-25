@@ -40,6 +40,8 @@ func DecodeFrames(a *App) {
 		case "reset-config":
 			if err := a.Lfs.Remove(a.ConfigFile()); err != nil {
 				a.Logs.Error(errors.Wrap(err, "remove file"))
+			} else {
+				a.Logs.Log("config reset")
 			}
 
 		default:

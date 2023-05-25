@@ -67,8 +67,8 @@ func main() {
 		noErr(err)
 	}()
 
-	//err = rpc.Send(device, "reset-config", nil)
-	//noErr(err)
+	err = rpc.Send(device, "reset-config", nil)
+	noErr(err)
 
 	select {}
 }
