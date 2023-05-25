@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
 	"uc-go/app"
@@ -11,6 +12,7 @@ import (
 	"uc-go/leds"
 	"uc-go/storage"
 	"uc-go/util"
+	"uc-go/wifi"
 )
 
 func run(a *app.App) error {
@@ -43,6 +45,9 @@ func run(a *app.App) error {
 
 	sm := leds.Setup()
 	go app.RunLeds(a.Cfg, sm)
+
+	r := wifi.F(2, 3)
+	a.Logs.Log(fmt.Sprintf("F(2,3) = %d", r))
 
 	select {}
 }
