@@ -87,12 +87,12 @@ func loadConfig(ap *app.App) error {
 	if len(content) == 0 {
 		return storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
 	} else {
-		_, err = ap.Cfg.UnmarshalMsg(content)
+		_, err = initConfig.UnmarshalMsg(content)
 		if err != nil {
 			return errors.Wrap(err, "unmarshal")
 		}
-
 		ap.Logs.Log("loaded configfile")
+		ap.Logs.Rpc("show-config", &initConfig)
 	}
 
 	ap.Cfg = cfg.NewSyncConfig(initConfig)

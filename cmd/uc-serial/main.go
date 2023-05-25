@@ -67,14 +67,6 @@ func main() {
 		noErr(err)
 	}()
 
-	go func() {
-		for {
-			time.Sleep(time.Second)
-			err = rpc.Send(device, "get-config", nil)
-			noErr(err)
-		}
-	}()
-
 	select {}
 }
 
