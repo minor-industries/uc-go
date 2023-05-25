@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/jessevdk/go-flags"
 	"github.com/tarm/serial"
 	"path/filepath"
 	"time"
@@ -13,7 +14,14 @@ import (
 	"uc-go/protocol/rpc/api"
 )
 
+var opts struct {
+	Remove bool `long:"remove" optional:"true"`
+}
+
 func main() {
+	_, err := flags.Parse(&opts)
+	noErr(err)
+
 	dev, err := filepath.Glob("/dev/tty.usb*")
 	noErr(err)
 
@@ -67,8 +75,13 @@ func main() {
 		noErr(err)
 	}()
 
-	err = rpc.Send(device, "reset-config", nil)
-	noErr(err)
+	if opts.Remove {
+		go func() {
+			time.Sleep(2 * time.Second)
+			err = rpc.Send(device, "reset-config", nil)
+			noErr(err)
+		}()
+	}
 
 	select {}
 }
