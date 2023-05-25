@@ -18,7 +18,7 @@ const (
 	ledMaxLevel = 0.5 // brightness level of NeoPxels (0~1)
 )
 
-func RunLeds(
+func runLeds(
 	config *util2.SyncConfig[cfg.Config],
 	sm *pio.PIOStateMachine,
 ) {
