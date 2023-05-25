@@ -54,10 +54,10 @@ func run(a *app.App) error {
 
 func main() {
 	a := &app.App{
-		Logs: rpc.NewStoredLogs(100),
+		Logs: rpc.NewQueue(100),
 	}
 
-	go app.DecodeFrames(a)
+	go app.DecodeFrames(a.Logs, a)
 
 	err := run(a)
 	if err != nil {

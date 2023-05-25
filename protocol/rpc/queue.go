@@ -9,7 +9,7 @@ type Queue struct {
 	logs chan Req
 }
 
-func NewStoredLogs(bufSize int) *Queue {
+func NewQueue(bufSize int) *Queue {
 	return &Queue{logs: make(chan Req, bufSize)}
 }
 
