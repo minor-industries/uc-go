@@ -63,19 +63,10 @@ func main() {
 }
 
 func loadConfig(ap *app.App) error {
-	initConfig := cfg.Config{
-		CurrentAnimation: "rainbow1",
-		NumLeds:          150,
-		StartIndex:       0,
-		Length:           5.0,
-		Scale:            0.5,
-		MinScale:         0.3,
-		ScaleIncr:        0.02,
-	}
+	initConfig := cfg.DefaultConfig
 
 	_, err := ap.Lfs.Stat(ap.ConfigFile())
 	if err != nil {
-		// TODO: this will currently fail (the first time) as WriteMsgp reads old file content
 		return storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
 	}
 

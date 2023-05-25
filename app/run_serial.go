@@ -37,6 +37,11 @@ func DecodeFrames(a *App) {
 				a.Logs.Error(errors.Wrap(err, "send show-config"))
 			}
 
+		case "reset-config":
+			if err := a.Lfs.Remove(a.ConfigFile()); err != nil {
+				a.Logs.Error(errors.Wrap(err, "remove file"))
+			}
+
 		default:
 			a.Logs.Log("unknown method: " + rpcMsg.Method)
 		}

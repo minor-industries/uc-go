@@ -125,9 +125,14 @@ func WriteMsgp(
 		return errors.Wrap(err, "marshal")
 	}
 
-	oldContent, err := ReadFile(lfs, filename)
-	if err != nil {
-		return errors.Wrap(err, "readfile")
+	var oldContent []byte
+	_, err = lfs.Stat(filename)
+	switch err {
+	case nil:
+		oldContent, err = ReadFile(lfs, filename)
+		if err != nil {
+			return errors.Wrap(err, "readfile")
+		}
 	}
 
 	if bytes.Equal(oldContent, newContent) {
