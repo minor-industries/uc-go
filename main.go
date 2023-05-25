@@ -62,7 +62,7 @@ func main() {
 		Logs: util.NewStoredLogs(100),
 	}
 
-	go app.DecodeFrames(a.Logs)
+	go app.DecodeFrames(a)
 
 	err := run(a)
 	if err != nil {

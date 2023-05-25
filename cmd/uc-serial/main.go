@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/tarm/serial"
 	"path/filepath"
 	"time"
+	"uc-go/cfg"
 	"uc-go/protocol/framing"
 	"uc-go/protocol/rpc"
 	"uc-go/protocol/rpc/api"
@@ -51,11 +53,12 @@ func main() {
 				fmt.Println("got log:", msg.Message)
 
 			case "show-config":
-				//msg := &cfg.Config{}
-				//_, err := msg.UnmarshalMsg(rpcMsg.Body)
-				//noErr(err)
-				//fmt.Println("config:", spew.Sdump(msg))
-				fmt.Println("config:", hex.Dump(rpcMsg.Body))
+				fmt.Println("config:")
+				fmt.Println(hex.Dump(rpcMsg.Body))
+				msg := &cfg.Config{}
+				_, err := msg.UnmarshalMsg(rpcMsg.Body)
+				noErr(err)
+				fmt.Println("config:", spew.Sdump(msg))
 
 			default:
 				fmt.Println("unknown message: " + rpcMsg.Method)
@@ -64,8 +67,11 @@ func main() {
 		noErr(err)
 	}()
 
-	err = rpc.Send(device, "get-config", nil)
-	noErr(err)
+	go func() {
+		time.Sleep(time.Second)
+		err = rpc.Send(device, "get-config", nil)
+		noErr(err)
+	}()
 
 	select {}
 }
