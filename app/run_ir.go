@@ -19,7 +19,7 @@ func (a *App) HandleIR(
 			msg.Address,
 		)
 
-		log(line)
+		a.Logs.Log(line)
 
 		switch msg.Command {
 		case 0x00: // vol-

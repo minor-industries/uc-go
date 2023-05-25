@@ -27,8 +27,8 @@ func DecodeFrames(a *App) {
 
 		switch rpcMsg.Method {
 		case "dump-stored-logs":
-			a.Logs.Each(func(s string) {
-				log("stored: " + s)
+			a.Logs.Each(func(req rpc.Req) {
+				rpc.Send(os.Stdout, req.Method, req.Body)
 			})
 
 		case "get-config":

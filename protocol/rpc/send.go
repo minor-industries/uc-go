@@ -7,6 +7,11 @@ import (
 	"uc-go/protocol/framing"
 )
 
+type Req struct {
+	Method string
+	Body   msgp.Marshaler
+}
+
 func Send(
 	w io.Writer,
 	method string,
