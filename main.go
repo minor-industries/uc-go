@@ -10,8 +10,8 @@ import (
 	"uc-go/cfg"
 	"uc-go/exe/ir"
 	"uc-go/leds"
+	"uc-go/protocol/rpc"
 	"uc-go/storage"
-	"uc-go/util"
 	"uc-go/wifi"
 )
 
@@ -54,7 +54,7 @@ func run(a *app.App) error {
 
 func main() {
 	a := &app.App{
-		Logs: util.NewStoredLogs(100),
+		Logs: rpc.NewStoredLogs(100),
 	}
 
 	go app.DecodeFrames(a)

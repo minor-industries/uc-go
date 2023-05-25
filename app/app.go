@@ -3,7 +3,7 @@ package app
 import (
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/cfg"
-	"uc-go/util"
+	"uc-go/protocol/rpc"
 )
 
 const (
@@ -11,7 +11,7 @@ const (
 )
 
 type App struct {
-	Logs *util.StoredLogs
+	Logs *rpc.Queue
 	Lfs  *littlefs.LFS
 	Cfg  *cfg.SyncConfig
 }
