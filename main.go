@@ -57,7 +57,7 @@ func main() {
 		Logs: rpc.NewQueue(100),
 	}
 
-	go app.DecodeFrames(a.Logs, a)
+	go rpc.DecodeFrames(a.Logs, a)
 
 	err := run(a)
 	if err != nil {
