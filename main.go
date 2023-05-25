@@ -25,22 +25,10 @@ func run(a *app.App) error {
 		return errors.New("no lfs")
 	}
 
-	loadedCfg := &cfg.Config{
-		CurrentAnimation: "rainbow1",
-		NumLeds:          150,
-		StartIndex:       0,
-		Length:           5.0,
-		Scale:            0.5,
-		MinScale:         0.3,
-		ScaleIncr:        0.02,
-	}
-
 	err = loadConfig(a)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
-
-	a.Cfg = cfg.NewSyncConfig(*loadedCfg)
 
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {
@@ -74,28 +62,40 @@ func main() {
 	select {}
 }
 
-func loadConfig(a *app.App) error {
-	_, err := a.Lfs.Stat(a.ConfigFile())
-	if err != nil {
-		// TODO: this will currently fail (the first time) as WriteMsgp reads old file content
-		return storage.WriteMsgp(a.Logs, a.Lfs, a.Cfg, a.ConfigFile())
+func loadConfig(ap *app.App) error {
+	initConfig := cfg.Config{
+		CurrentAnimation: "rainbow1",
+		NumLeds:          150,
+		StartIndex:       0,
+		Length:           5.0,
+		Scale:            0.5,
+		MinScale:         0.3,
+		ScaleIncr:        0.02,
 	}
 
-	content, err := storage.ReadFile(a.Lfs, a.ConfigFile())
+	_, err := ap.Lfs.Stat(ap.ConfigFile())
+	if err != nil {
+		// TODO: this will currently fail (the first time) as WriteMsgp reads old file content
+		return storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
+	}
+
+	content, err := storage.ReadFile(ap.Lfs, ap.ConfigFile())
 	if err != nil {
 		return errors.Wrap(err, "readfile")
 	}
 
 	if len(content) == 0 {
-		return storage.WriteMsgp(a.Logs, a.Lfs, a.Cfg, a.ConfigFile())
+		return storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
 	} else {
-		_, err = a.Cfg.UnmarshalMsg(content)
+		_, err = ap.Cfg.UnmarshalMsg(content)
 		if err != nil {
 			return errors.Wrap(err, "unmarshal")
 		}
 
-		a.Logs.Log("loaded configfile")
+		ap.Logs.Log("loaded configfile")
 	}
+
+	ap.Cfg = cfg.NewSyncConfig(initConfig)
 
 	return nil
 }
