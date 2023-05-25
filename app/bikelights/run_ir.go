@@ -1,10 +1,10 @@
-package app
+package bikelights
 
 import (
 	"fmt"
 	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
-	"uc-go/app/cfg"
+	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
 )

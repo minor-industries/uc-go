@@ -8,7 +8,7 @@ import (
 	"github.com/tarm/serial"
 	"path/filepath"
 	"time"
-	"uc-go/app/cfg"
+	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/protocol/framing"
 	"uc-go/pkg/protocol/rpc"
 	"uc-go/pkg/protocol/rpc/api"

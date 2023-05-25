@@ -1,11 +1,11 @@
-package app
+package bikelights
 
 import (
 	"fmt"
 	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/app/cfg"
+	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/ir"
 	"uc-go/pkg/leds"
 	"uc-go/pkg/protocol/rpc"

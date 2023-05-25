@@ -1,11 +1,11 @@
-package app
+package bikelights
 
 import (
 	"fmt"
 	"image/color"
 	"sync/atomic"
 	"time"
-	"uc-go/app/cfg"
+	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/leds"
 	"uc-go/pkg/leds/animations/bounce"
 	"uc-go/pkg/leds/animations/rainbow"

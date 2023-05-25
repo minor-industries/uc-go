@@ -1,7 +1,7 @@
 package strip
 
 import (
-	"uc-go/app/cfg"
+	"uc-go/app/bikelights/cfg"
 )
 
 type Led struct {

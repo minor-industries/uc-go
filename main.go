@@ -4,12 +4,12 @@ package main
 
 import (
 	"github.com/pkg/errors"
-	"uc-go/app"
+	"uc-go/app/bikelights"
 	"uc-go/pkg/protocol/rpc"
 )
 
 func main() {
-	a := &app.App{
+	a := &bikelights.App{
 		Logs: rpc.NewQueue(100),
 	}
 

@@ -1,4 +1,4 @@
-package app
+package bikelights
 
 import (
 	"github.com/pkg/errors"
