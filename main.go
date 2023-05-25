@@ -25,10 +25,12 @@ func run(a *app.App) error {
 		return errors.New("no lfs")
 	}
 
-	err = loadConfig(a)
+	config, err := loadConfig(a)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
+
+	a.Cfg = cfg.NewSyncConfig(*config)
 
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {
@@ -62,31 +64,29 @@ func main() {
 	select {}
 }
 
-func loadConfig(ap *app.App) error {
+func loadConfig(ap *app.App) (*cfg.Config, error) {
 	initConfig := cfg.DefaultConfig
 
 	_, err := ap.Lfs.Stat(ap.ConfigFile())
 	if err != nil {
-		return storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
+		return &initConfig, storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
 	}
 
 	content, err := storage.ReadFile(ap.Lfs, ap.ConfigFile())
 	if err != nil {
-		return errors.Wrap(err, "readfile")
+		return &initConfig, errors.Wrap(err, "readfile")
 	}
 
 	if len(content) == 0 {
-		return storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
+		return &initConfig, storage.WriteMsgp(ap.Logs, ap.Lfs, &initConfig, ap.ConfigFile())
 	} else {
 		_, err = initConfig.UnmarshalMsg(content)
 		if err != nil {
-			return errors.Wrap(err, "unmarshal")
+			return &initConfig, errors.Wrap(err, "unmarshal")
 		}
 		ap.Logs.Log("loaded configfile")
 		ap.Logs.Rpc("show-config", &initConfig)
 	}
 
-	ap.Cfg = cfg.NewSyncConfig(initConfig)
-
-	return nil
+	return &initConfig, nil
 }
