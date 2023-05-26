@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/pkg/errors"
+	"os"
 	"uc-go/app/bikelights"
 	"uc-go/pkg/protocol/rpc"
 )
@@ -14,8 +15,16 @@ func main() {
 	}
 
 	router := rpc.NewRouter()
-	router.Register(a.Handlers())
+	router.Register(map[string]rpc.Handler{
+		"dump-stored-logs": rpc.HandlerFunc(func(method string, body []byte) error {
+			a.Logs.Each(func(req rpc.Req) {
+				rpc.Send(os.Stdout, req.Method, req.Body)
+			})
+			return nil
+		}),
+	})
 
+	router.Register(a.Handlers())
 	go rpc.DecodeFrames(a.Logs, router)
 
 	err := a.Run()
