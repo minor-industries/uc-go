@@ -7,7 +7,19 @@ import (
 )
 
 type Handler interface {
-	Handle(string, []byte) error
+	Handle(method string, body []byte) error
+}
+
+type handlerFunc struct {
+	f func(method string, body []byte) error
+}
+
+func (h *handlerFunc) Handle(method string, body []byte) error {
+	return h.f(method, body)
+}
+
+func HandlerFunc(f func(method string, body []byte) error) *handlerFunc {
+	return &handlerFunc{f: f}
 }
 
 func DecodeFrames(

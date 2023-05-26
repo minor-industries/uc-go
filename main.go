@@ -13,7 +13,10 @@ func main() {
 		Logs: rpc.NewQueue(100),
 	}
 
-	go rpc.DecodeFrames(a.Logs, a)
+	router := rpc.NewRouter()
+	router.Register(a.Handlers())
+
+	go rpc.DecodeFrames(a.Logs, router)
 
 	err := a.Run()
 	if err != nil {
