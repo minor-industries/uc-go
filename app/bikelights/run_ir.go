@@ -3,8 +3,10 @@ package bikelights
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"os"
 	"tinygo.org/x/drivers/irremote"
 	"uc-go/app/bikelights/cfg"
+	"uc-go/pkg/protocol/rpc"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
 )
@@ -44,11 +46,14 @@ func (a *App) HandleIR(
 			a.Cfg.Edit(func(c *cfg.Config) {
 				c.CurrentAnimation = "bounce"
 			})
-		case 0x0E:
+		case 0x0E: // the "return" button
 			ss := a.Cfg.SnapShot()
 			if err := storage.WriteMsgp(a.Logs, a.Lfs, &ss, configFile); err != nil {
 				a.Logs.Error(errors.Wrap(err, "save config"))
 			}
+		case 0x04: // setup
+			ss := a.Cfg.SnapShot()
+			_ = rpc.Send(os.Stdout, "show-config", &ss)
 		}
 	}
 }
