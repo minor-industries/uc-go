@@ -10,16 +10,15 @@ import (
 )
 
 func main() {
+	rpcQueue := rpc.NewQueue(os.Stdout, 100)
 	a := &bikelights.App{
-		Logs: rpc.NewQueue(100),
+		Logs: rpcQueue,
 	}
 
 	router := rpc.NewRouter()
 	router.Register(map[string]rpc.Handler{
 		"__sys__.dump-stored-logs": rpc.HandlerFunc(func(method string, body []byte) error {
-			a.Logs.Each(func(req rpc.Req) {
-				rpc.Send(os.Stdout, req.Method, req.Body)
-			})
+			rpcQueue.Start()
 			return nil
 		}),
 	})
