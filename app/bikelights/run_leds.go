@@ -24,7 +24,7 @@ func runLeds(
 ) {
 	pixels := make([]color.RGBA, 150)
 
-	strip := strip.NewStrip(config.SnapShot())
+	ledStrip := strip.NewStrip(config.SnapShot())
 
 	tickDuration := 30 * time.Millisecond
 
@@ -48,16 +48,23 @@ func runLeds(
 
 	animations := map[string]func(t, dt float64){
 		"rainbow1": rainbow.Rainbow1(
-			&rainbow.App{Strip: strip},
+			&rainbow.App{Strip: ledStrip},
 			&rainbow.FaderConfig{TimeScale: 0.3},
 		),
 		"rainbow2": rainbow.Rainbow2(
-			&rainbow.App{Strip: strip},
+			&rainbow.App{Strip: ledStrip},
 			&rainbow.FaderConfig{TimeScale: 0.03},
 		),
 		"bounce": bounce.Bounce(
-			&bounce.App{Strip: strip},
+			&bounce.App{Strip: ledStrip},
 		).Tick,
+		"white": func(t, dt float64) {
+			ledStrip.Each(func(i int, led *strip.Led) {
+				led.R = 1.0
+				led.G = 1.0
+				led.B = 1.0
+			})
+		},
 	}
 
 	f := func() {
@@ -67,7 +74,7 @@ func runLeds(
 		cb := animations[curCfg.CurrentAnimation]
 		t := float64(time.Now().UnixNano()) / 1e9
 		cb(t, tickDuration.Seconds())
-		writeColors(sm, curCfg.Scale, pixels, strip)
+		writeColors(sm, curCfg.Scale, pixels, ledStrip)
 	}
 
 	ticker := time.NewTicker(tickDuration)

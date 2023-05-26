@@ -46,6 +46,10 @@ func (a *App) HandleIR(
 			a.Cfg.Edit(func(c *cfg.Config) {
 				c.CurrentAnimation = "bounce"
 			})
+		case 0x19: // 8
+			a.Cfg.Edit(func(c *cfg.Config) {
+				c.CurrentAnimation = "white"
+			})
 		case 0x0E: // the "return" button
 			ss := a.Cfg.SnapShot()
 			if err := storage.WriteMsgp(a.Logs, a.Lfs, &ss, configFile); err != nil {
