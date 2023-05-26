@@ -40,7 +40,7 @@ func main() {
 
 	go func() {
 		for range time.NewTicker(time.Second).C {
-			err := rpc.Send(device, "dump-stored-logs", nil)
+			err := rpc.Send(device, "__sys__.dump-stored-logs", nil)
 			noErr(err)
 		}
 	}()

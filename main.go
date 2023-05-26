@@ -16,7 +16,7 @@ func main() {
 
 	router := rpc.NewRouter()
 	router.Register(map[string]rpc.Handler{
-		"dump-stored-logs": rpc.HandlerFunc(func(method string, body []byte) error {
+		"__sys__.dump-stored-logs": rpc.HandlerFunc(func(method string, body []byte) error {
 			a.Logs.Each(func(req rpc.Req) {
 				rpc.Send(os.Stdout, req.Method, req.Body)
 			})
