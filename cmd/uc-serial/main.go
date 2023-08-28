@@ -15,7 +15,9 @@ import (
 )
 
 var opts struct {
-	Remove bool `long:"remove" optional:"true"`
+	Remove     bool `long:"remove" optional:"true"`
+	SetConfig  bool `long:"set-config" optional:"true"`
+	ShowConfig bool `long:"show-config" optional:"true"`
 }
 
 func main() {
@@ -79,6 +81,33 @@ func main() {
 		go func() {
 			time.Sleep(2 * time.Second)
 			err = rpc.Send(device, "reset-config", nil)
+			noErr(err)
+		}()
+	}
+
+	if opts.SetConfig {
+		go func() {
+			time.Sleep(2 * time.Second)
+			fmt.Println("setting config")
+			msg := &cfg.Config{
+				CurrentAnimation: "bounce",
+				NumLeds:          10,
+				StartIndex:       0,
+				Length:           5.0,
+				Scale:            0.5,
+				MinScale:         0.04,
+				ScaleIncr:        0.02,
+			}
+			err = rpc.Send(device, "set-config", msg)
+			noErr(err)
+		}()
+	}
+
+	if opts.ShowConfig {
+		go func() {
+			time.Sleep(2 * time.Second)
+			fmt.Println("showing config")
+			err = rpc.Send(device, "get-config", nil)
 			noErr(err)
 		}()
 	}

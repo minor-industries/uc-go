@@ -1,8 +1,10 @@
 package bikelights
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"os"
+	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/protocol/rpc"
 )
 
@@ -22,6 +24,21 @@ func (a *App) Handlers() map[string]rpc.Handler {
 			} else {
 				a.Logs.Log("config reset")
 			}
+			return nil
+
+		}),
+
+		"set-config": rpc.HandlerFunc(func(method string, body []byte) error {
+			fmt.Println("config:")
+			msg := &cfg.Config{}
+			_, err := msg.UnmarshalMsg(body)
+			if err != nil {
+				return errors.Wrap(err, "unmarshal")
+			}
+			a.Cfg.Edit(func(c *cfg.Config) {
+				*c = *msg
+			})
+			a.Logs.Log("set config")
 			return nil
 		}),
 	}
