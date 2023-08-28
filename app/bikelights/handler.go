@@ -6,6 +6,7 @@ import (
 	"os"
 	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/storage"
 )
 
 func (a *App) Handlers() map[string]rpc.Handler {
@@ -38,6 +39,10 @@ func (a *App) Handlers() map[string]rpc.Handler {
 			a.Cfg.Edit(func(c *cfg.Config) {
 				*c = *msg
 			})
+			ss := a.Cfg.SnapShot()
+			if err := storage.WriteMsgp(a.Logs, a.Lfs, &ss, configFile); err != nil {
+				a.Logs.Error(errors.Wrap(err, "save config"))
+			}
 			a.Logs.Log("set config")
 			return nil
 		}),
