@@ -79,6 +79,7 @@ func main() {
 
 	if opts.Remove {
 		go func() {
+			fmt.Println("removing")
 			time.Sleep(2 * time.Second)
 			err = rpc.Send(device, "reset-config", nil)
 			noErr(err)
