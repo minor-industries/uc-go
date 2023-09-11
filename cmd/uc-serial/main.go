@@ -91,9 +91,9 @@ func main() {
 			time.Sleep(2 * time.Second)
 			fmt.Println("setting config")
 			msg := &cfg.Config{
-				CurrentAnimation: "bounce",
-				NumLeds:          10,
-				StartIndex:       0,
+				CurrentAnimation: "rainbow1",
+				NumLeds:          150,
+				StartIndex:       25,
 				Length:           5.0,
 				Scale:            0.5,
 				MinScale:         0.04,
