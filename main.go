@@ -29,6 +29,9 @@ func main2() {
 	})
 
 	err := rfm69(a)
+	if err != nil {
+		a.Logs.Error(errors.Wrap(err, "rfm69"))
+	}
 
 	router.Register(a.Handlers())
 	go rpc.DecodeFrames(a.Logs, router)
@@ -54,7 +57,7 @@ func rfm69(a *bikelights.App) error {
 		SDI:  machine.GP4,
 	})
 	if err != nil {
-		a.Logs.Error(errors.Wrap(err, "configure SPI"))
+		return errors.Wrap(err, "configure SPI")
 	} else {
 		a.Logs.Log("setup SPI")
 	}
@@ -70,20 +73,25 @@ func rfm69(a *bikelights.App) error {
 
 	time.Sleep(300 * time.Millisecond) // TODO: shorten to optimal value
 
+	CSn := machine.GP5
+	CSn.Set(false)
+	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	CSn.Set(false)
+
 	{
 		for i := 0; i < 15; i++ {
 			reg, err := readReg(spi, REG_SYNCVALUE1)
 			if err != nil {
 				return errors.Wrap(err, "read reg")
 			}
-			a.Logs.Log(fmt.Sprintf("val = 0x%02x\n", reg))
+			a.Logs.Log(fmt.Sprintf("val = 0x%02x, t=%s", reg, time.Now().String()))
 			if reg == 0xAA {
 				break
 			}
 			if err := writeReg(spi, REG_SYNCVALUE1, 0xAA); err != nil {
 				return errors.Wrap(err, "write reg")
 			}
-			time.Sleep(time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
