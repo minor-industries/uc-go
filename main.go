@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/pkg/errors"
+	"machine"
 	"os"
 	"uc-go/app/bikelights"
 	"uc-go/app/bikelights/cfg"
@@ -25,10 +26,22 @@ func main2() {
 		}),
 	})
 
+	err := machine.SPI0.Configure(machine.SPIConfig{
+		Mode: machine.Mode3,
+		SCK:  machine.GP2,
+		SDO:  machine.GP3,
+		SDI:  machine.GP4,
+	})
+	if err != nil {
+		a.Logs.Error(errors.Wrap(err, "configure SPI"))
+	} else {
+		a.Logs.Log("setup SPI")
+	}
+
 	router.Register(a.Handlers())
 	go rpc.DecodeFrames(a.Logs, router)
 
-	err := a.Run()
+	err = a.Run()
 	if err != nil {
 		a.Logs.Error(errors.Wrap(err, "run exited with error"))
 	} else {
