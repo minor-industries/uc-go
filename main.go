@@ -3,9 +3,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"machine"
 	"os"
+	"time"
 	"uc-go/app/bikelights"
 	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/protocol/rpc"
@@ -26,17 +28,7 @@ func main2() {
 		}),
 	})
 
-	err := machine.SPI0.Configure(machine.SPIConfig{
-		Mode: machine.Mode3,
-		SCK:  machine.GP2,
-		SDO:  machine.GP3,
-		SDI:  machine.GP4,
-	})
-	if err != nil {
-		a.Logs.Error(errors.Wrap(err, "configure SPI"))
-	} else {
-		a.Logs.Log("setup SPI")
-	}
+	err := rfm69(a)
 
 	router.Register(a.Handlers())
 	go rpc.DecodeFrames(a.Logs, router)
@@ -49,6 +41,78 @@ func main2() {
 	}
 
 	select {}
+}
+
+func rfm69(a *bikelights.App) error {
+	const REG_SYNCVALUE1 = 0x2F
+
+	spi := machine.SPI0
+	err := spi.Configure(machine.SPIConfig{
+		Mode: machine.Mode3,
+		SCK:  machine.GP2,
+		SDO:  machine.GP3,
+		SDI:  machine.GP4,
+	})
+	if err != nil {
+		a.Logs.Error(errors.Wrap(err, "configure SPI"))
+	} else {
+		a.Logs.Log("setup SPI")
+	}
+
+	rst := machine.GP6
+	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	rst.Set(true)
+
+	time.Sleep(300 * time.Millisecond) // TODO: shorten to optimal value
+
+	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	rst.Set(false)
+
+	time.Sleep(300 * time.Millisecond) // TODO: shorten to optimal value
+
+	{
+		for i := 0; i < 15; i++ {
+			reg, err := readReg(spi, REG_SYNCVALUE1)
+			if err != nil {
+				return errors.Wrap(err, "read reg")
+			}
+			a.Logs.Log(fmt.Sprintf("val = 0x%02x\n", reg))
+			if reg == 0xAA {
+				break
+			}
+			if err := writeReg(spi, REG_SYNCVALUE1, 0xAA); err != nil {
+				return errors.Wrap(err, "write reg")
+			}
+			time.Sleep(time.Second)
+		}
+	}
+
+	return err
+}
+
+func readReg(spi *machine.SPI, addr byte) (byte, error) {
+	rx := make([]byte, 2)
+
+	if err := spi.Tx(
+		[]byte{addr & 0x7F, 0},
+		rx,
+	); err != nil {
+		return 0, errors.Wrap(err, "tx")
+	}
+
+	return rx[1], nil
+}
+
+func writeReg(spi *machine.SPI, addr byte, value byte) error {
+	rx := make([]byte, 2)
+
+	if err := spi.Tx(
+		[]byte{addr | 0x80, value},
+		rx,
+	); err != nil {
+		return errors.Wrap(err, "tx")
+	}
+	return nil
 }
 
 func resetConfig() {
