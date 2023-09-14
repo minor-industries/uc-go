@@ -4,8 +4,6 @@ go 1.19
 
 replace github.com/cacktopus/theheads => ../heads
 
-replace tinygo.org/x/tinyfs => ../tinyfs
-
 require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
