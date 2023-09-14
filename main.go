@@ -75,13 +75,13 @@ func rfm69(a *bikelights.App) error {
 	time.Sleep(300 * time.Millisecond) // TODO: shorten to optimal value
 
 	CSn := machine.GP5
-	CSn.Set(false)
+	CSn.Set(true)
 	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	CSn.Set(false)
+	CSn.Set(true)
 
 	{
 		for i := 0; i < 15; i++ {
-			reg, err := readReg(spi, REG_SYNCVALUE1)
+			reg, err := readReg(spi, CSn, REG_SYNCVALUE1)
 			if err != nil {
 				return errors.Wrap(err, "read reg")
 			}
@@ -89,7 +89,7 @@ func rfm69(a *bikelights.App) error {
 			if reg == 0xAA {
 				break
 			}
-			if err := writeReg(spi, REG_SYNCVALUE1, 0xAA); err != nil {
+			if err := writeReg(spi, CSn, REG_SYNCVALUE1, 0xAA); err != nil {
 				return errors.Wrap(err, "write reg")
 			}
 			time.Sleep(100 * time.Millisecond)
@@ -99,7 +99,9 @@ func rfm69(a *bikelights.App) error {
 	return err
 }
 
-func readReg(spi *machine.SPI, addr byte) (byte, error) {
+func readReg(spi *machine.SPI, CSn machine.Pin, addr byte) (byte, error) {
+	CSn.Set(false)
+
 	rx := make([]byte, 2)
 
 	if err := spi.Tx(
@@ -109,11 +111,15 @@ func readReg(spi *machine.SPI, addr byte) (byte, error) {
 		return 0, errors.Wrap(err, "tx")
 	}
 
+	CSn.Set(true)
+
 	return rx[1], nil
 }
 
-func writeReg(spi *machine.SPI, addr byte, value byte) error {
+func writeReg(spi *machine.SPI, CSn machine.Pin, addr byte, value byte) error {
 	rx := make([]byte, 2)
+
+	CSn.Set(false)
 
 	if err := spi.Tx(
 		[]byte{addr | 0x80, value},
@@ -121,6 +127,9 @@ func writeReg(spi *machine.SPI, addr byte, value byte) error {
 	); err != nil {
 		return errors.Wrap(err, "tx")
 	}
+
+	CSn.Set(true)
+
 	return nil
 }
 
