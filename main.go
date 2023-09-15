@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"os"
@@ -28,7 +29,7 @@ func main2() {
 		}),
 	})
 
-	err := rfm69(a)
+	err := rfm69v2(a)
 	if err != nil {
 		a.Logs.Error(errors.Wrap(err, "rfm69"))
 	}
@@ -46,7 +47,35 @@ func main2() {
 	select {}
 }
 
-func rfm69(a *bikelights.App) error {
+type Board struct{}
+
+func (b Board) TxSPI(w, r []byte) error {
+	return errors.New("not implemented")
+}
+
+func (b Board) Reset(b2 bool) error {
+	return errors.New("not implemented")
+}
+
+func (b Board) WaitForD0Edge() {
+	select {}
+}
+
+func rfm69v2(a *bikelights.App) error {
+	board := &Board{}
+
+	log := func(s string) {
+		a.Logs.Log(s)
+	}
+
+	if err := rfm69.Run(board, log); err != nil {
+		return errors.Wrap(err, "run rfm69")
+	}
+
+	return nil
+}
+
+func rfm69v1(a *bikelights.App) error {
 	const REG_SYNCVALUE1 = 0x2F
 
 	spi := machine.SPI0

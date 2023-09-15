@@ -4,7 +4,10 @@ go 1.19
 
 replace github.com/cacktopus/theheads => ../heads
 
+replace github.com/minor-industries/rfm69 => ../minor-industries/rfm69
+
 require (
+	github.com/minor-industries/rfm69 v0.0.0-00010101000000-000000000000
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
 	github.com/tinylib/msgp v1.1.8
