@@ -29,15 +29,17 @@ func main2() {
 		}),
 	})
 
-	err := rfm69v2(a)
-	if err != nil {
-		a.Logs.Error(errors.Wrap(err, "rfm69"))
-	}
+	go func() {
+		err := rfm69v2(a)
+		if err != nil {
+			a.Logs.Error(errors.Wrap(err, "rfm69"))
+		}
+	}()
 
 	router.Register(a.Handlers())
 	go rpc.DecodeFrames(a.Logs, router)
 
-	err = a.Run()
+	err := a.Run()
 	if err != nil {
 		a.Logs.Error(errors.Wrap(err, "run exited with error"))
 	} else {
@@ -47,26 +49,59 @@ func main2() {
 	select {}
 }
 
-type Board struct{}
-
-func (b Board) TxSPI(w, r []byte) error {
-	return errors.New("not implemented")
+type Board struct {
+	spi *machine.SPI
+	rst machine.Pin
+	csn machine.Pin
 }
 
-func (b Board) Reset(b2 bool) error {
-	return errors.New("not implemented")
+func (b *Board) TxSPI(w, r []byte) error {
+	b.csn.Low()
+	err := b.spi.Tx(w, r)
+	b.csn.High()
+	return err
 }
 
-func (b Board) WaitForD0Edge() {
-	select {}
+func (b *Board) Reset(b2 bool) error {
+	b.rst.Set(b2)
+	return nil
+}
+
+func (b *Board) WaitForD0Edge() {
+	select {} // TODO
 }
 
 func rfm69v2(a *bikelights.App) error {
-	board := &Board{}
+	rst := machine.GP6
+	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	spi := machine.SPI0
+	err := spi.Configure(machine.SPIConfig{
+		Frequency: 64000, // TODO: increase
+		Mode:      machine.Mode3,
+		SCK:       machine.GP2,
+		SDO:       machine.GP3,
+		SDI:       machine.GP4,
+	})
+	if err != nil {
+		return errors.Wrap(err, "configure SPI")
+	} else {
+		a.Logs.Log("setup SPI")
+	}
+
+	CSn := machine.GP5
+	CSn.Set(true)
+	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	CSn.Set(true)
+
+	board := &Board{spi: spi, rst: rst, csn: CSn}
 
 	log := func(s string) {
 		a.Logs.Log(s)
 	}
+
+	//_ = board
+	//_ = log
 
 	if err := rfm69.Run(board, log); err != nil {
 		return errors.Wrap(err, "run rfm69")
