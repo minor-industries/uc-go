@@ -49,6 +49,10 @@ func main2() {
 }
 
 func rfm69v2(a *bikelights.App) error {
+	log := func(s string) {
+		a.Logs.Log(s)
+	}
+
 	rst := machine.GP6
 	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
@@ -71,13 +75,15 @@ func rfm69v2(a *bikelights.App) error {
 	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	CSn.Set(true)
 
-	board, err := rfm69_board.NewBoard(spi, rst, CSn, machine.GP7)
+	board, err := rfm69_board.NewBoard(
+		spi,
+		rst,
+		CSn,
+		machine.GP7,
+		log,
+	)
 	if err != nil {
 		return errors.Wrap(err, "new board")
-	}
-
-	log := func(s string) {
-		a.Logs.Log(s)
 	}
 
 	if err := rfm69.Run(board, log); err != nil {
