@@ -55,6 +55,10 @@ type Board struct {
 	csn machine.Pin
 }
 
+func NewBoard(spi *machine.SPI, rst machine.Pin, csn machine.Pin) *Board {
+	return &Board{spi: spi, rst: rst, csn: csn}
+}
+
 func (b *Board) TxSPI(w, r []byte) error {
 	b.csn.Low()
 	err := b.spi.Tx(w, r)
@@ -94,14 +98,11 @@ func rfm69v2(a *bikelights.App) error {
 	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	CSn.Set(true)
 
-	board := &Board{spi: spi, rst: rst, csn: CSn}
+	board := NewBoard(spi, rst, CSn)
 
 	log := func(s string) {
 		a.Logs.Log(s)
 	}
-
-	//_ = board
-	//_ = log
 
 	if err := rfm69.Run(board, log); err != nil {
 		return errors.Wrap(err, "run rfm69")
