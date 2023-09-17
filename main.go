@@ -3,15 +3,14 @@
 package main
 
 import (
-	"fmt"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"os"
-	"time"
 	"uc-go/app/bikelights"
 	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/protocol/rpc"
+	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/storage"
 )
 
@@ -49,32 +48,6 @@ func main2() {
 	select {}
 }
 
-type Board struct {
-	spi *machine.SPI
-	rst machine.Pin
-	csn machine.Pin
-}
-
-func NewBoard(spi *machine.SPI, rst machine.Pin, csn machine.Pin) *Board {
-	return &Board{spi: spi, rst: rst, csn: csn}
-}
-
-func (b *Board) TxSPI(w, r []byte) error {
-	b.csn.Low()
-	err := b.spi.Tx(w, r)
-	b.csn.High()
-	return err
-}
-
-func (b *Board) Reset(b2 bool) error {
-	b.rst.Set(b2)
-	return nil
-}
-
-func (b *Board) WaitForD0Edge() {
-	select {} // TODO
-}
-
 func rfm69v2(a *bikelights.App) error {
 	rst := machine.GP6
 	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
@@ -98,7 +71,7 @@ func rfm69v2(a *bikelights.App) error {
 	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	CSn.Set(true)
 
-	board := NewBoard(spi, rst, CSn)
+	board := rfm69_board.NewBoard(spi, rst, CSn)
 
 	log := func(s string) {
 		a.Logs.Log(s)
@@ -107,93 +80,6 @@ func rfm69v2(a *bikelights.App) error {
 	if err := rfm69.Run(board, log); err != nil {
 		return errors.Wrap(err, "run rfm69")
 	}
-
-	return nil
-}
-
-func rfm69v1(a *bikelights.App) error {
-	const REG_SYNCVALUE1 = 0x2F
-
-	spi := machine.SPI0
-	err := spi.Configure(machine.SPIConfig{
-		Frequency: 64000,
-		Mode:      machine.Mode3,
-		SCK:       machine.GP2,
-		SDO:       machine.GP3,
-		SDI:       machine.GP4,
-	})
-	if err != nil {
-		return errors.Wrap(err, "configure SPI")
-	} else {
-		a.Logs.Log("setup SPI")
-	}
-
-	rst := machine.GP6
-	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	rst.Set(true)
-
-	time.Sleep(300 * time.Millisecond) // TODO: shorten to optimal value
-
-	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	rst.Set(false)
-
-	time.Sleep(300 * time.Millisecond) // TODO: shorten to optimal value
-
-	CSn := machine.GP5
-	CSn.Set(true)
-	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	CSn.Set(true)
-
-	{
-		for i := 0; i < 15; i++ {
-			reg, err := readReg(spi, CSn, REG_SYNCVALUE1)
-			if err != nil {
-				return errors.Wrap(err, "read reg")
-			}
-			a.Logs.Log(fmt.Sprintf("val = 0x%02x, t=%s", reg, time.Now().String()))
-			if reg == 0xAA {
-				break
-			}
-			if err := writeReg(spi, CSn, REG_SYNCVALUE1, 0xAA); err != nil {
-				return errors.Wrap(err, "write reg")
-			}
-			time.Sleep(100 * time.Millisecond)
-		}
-	}
-
-	return err
-}
-
-func readReg(spi *machine.SPI, CSn machine.Pin, addr byte) (byte, error) {
-	CSn.Set(false)
-
-	rx := make([]byte, 2)
-
-	if err := spi.Tx(
-		[]byte{addr & 0x7F, 0},
-		rx,
-	); err != nil {
-		return 0, errors.Wrap(err, "tx")
-	}
-
-	CSn.Set(true)
-
-	return rx[1], nil
-}
-
-func writeReg(spi *machine.SPI, CSn machine.Pin, addr byte, value byte) error {
-	rx := make([]byte, 2)
-
-	CSn.Set(false)
-
-	if err := spi.Tx(
-		[]byte{addr | 0x80, value},
-		rx,
-	); err != nil {
-		return errors.Wrap(err, "tx")
-	}
-
-	CSn.Set(true)
 
 	return nil
 }
