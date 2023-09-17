@@ -58,11 +58,10 @@ func rfm69v2(a *bikelights.App) error {
 
 	spi := machine.SPI0
 	err := spi.Configure(machine.SPIConfig{
-		Frequency: 64000, // TODO: increase
-		Mode:      machine.Mode3,
-		SCK:       machine.GP2,
-		SDO:       machine.GP3,
-		SDI:       machine.GP4,
+		Mode: machine.Mode3,
+		SCK:  machine.GP2,
+		SDO:  machine.GP3,
+		SDI:  machine.GP4,
 	})
 	if err != nil {
 		return errors.Wrap(err, "configure SPI")
