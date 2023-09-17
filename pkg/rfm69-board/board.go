@@ -15,7 +15,9 @@ type Board struct {
 	intr machine.Pin
 
 	interruptCount uint32
-	interruptCh    chan struct{}
+	unhandledCount uint32
+
+	interruptCh chan struct{}
 
 	log func(s string)
 }
@@ -44,7 +46,11 @@ func NewBoard(
 	go func() {
 		ticker := time.NewTicker(2 * time.Second)
 		for range ticker.C {
-			log(fmt.Sprintf("interrupt count = %d", atomic.LoadUint32(&b.interruptCount)))
+			log(fmt.Sprintf(
+				"interrupt count = %d, unhandled count = %d",
+				atomic.LoadUint32(&b.interruptCount),
+				atomic.LoadUint32(&b.unhandledCount),
+			))
 		}
 	}()
 
@@ -64,13 +70,14 @@ func (b *Board) Reset(b2 bool) error {
 }
 
 func (b *Board) WaitForD0Edge() {
-	select {} // TODO
+	<-b.interruptCh
 }
 
 func (b *Board) handleInterrupt(pin machine.Pin) {
 	atomic.AddUint32(&b.interruptCount, 1)
 	select {
-	case <-b.interruptCh:
+	case b.interruptCh <- struct{}{}:
 	default:
+		atomic.AddUint32(&b.unhandledCount, 1)
 	}
 }
