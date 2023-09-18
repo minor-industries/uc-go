@@ -85,8 +85,12 @@ func rfm69v2(a *bikelights.App) error {
 		return errors.Wrap(err, "new board")
 	}
 
-	if err := rfm69.Run(board, log); err != nil {
+	if err := rfm69.Setup(board, log); err != nil {
 		return errors.Wrap(err, "run rfm69")
+	}
+
+	if err := rfm69.Rx(board, log); err != nil {
+		return errors.Wrap(err, "rx rfm69")
 	}
 
 	return nil
