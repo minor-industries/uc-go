@@ -3,10 +3,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"os"
+	"time"
+	"tinygo.org/x/drivers/aht20"
 	"uc-go/app/bikelights"
 	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/protocol/rpc"
@@ -28,6 +31,18 @@ func main2() {
 		}),
 	})
 
+	i2c := machine.I2C0
+
+	err := i2c.Configure(machine.I2CConfig{
+		SDA: machine.GP0,
+		SCL: machine.GP1,
+	})
+	if err != nil {
+		a.Logs.Error(errors.Wrap(err, "configure i2c"))
+	} else {
+		go readTemp(i2c, a.Logs)
+	}
+
 	go func() {
 		err := rfm69v2(a)
 		if err != nil {
@@ -35,17 +50,34 @@ func main2() {
 		}
 	}()
 
-	router.Register(a.Handlers())
+	//router.Register(a.Handlers())
 	go rpc.DecodeFrames(a.Logs, router)
 
-	err := a.Run()
-	if err != nil {
-		a.Logs.Error(errors.Wrap(err, "run exited with error"))
-	} else {
-		a.Logs.Log("run exited")
-	}
+	//err = a.Run()
+	//if err != nil {
+	//	a.Logs.Error(errors.Wrap(err, "run exited with error"))
+	//} else {
+	//	a.Logs.Log("run exited")
+	//}
 
 	select {}
+}
+
+func readTemp(i2c *machine.I2C, logs *rpc.Queue) {
+	sensor := aht20.New(i2c)
+	sensor.Configure()
+	sensor.Reset()
+
+	ticker := time.NewTicker(5 * time.Second)
+	for range ticker.C {
+		err := sensor.Read()
+		if err != nil {
+			logs.Error(errors.Wrap(err, "read sensor"))
+			continue
+		}
+		t := sensor.Celsius()
+		logs.Log(fmt.Sprintf("temperature = %0.01fC %0.01fF", t, (t*9/5)+32))
+	}
 }
 
 func rfm69v2(a *bikelights.App) error {
