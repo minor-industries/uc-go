@@ -18,12 +18,46 @@ type SensorData struct {
 	RelativeHumidity float32
 }
 
+type pinCfg struct {
+	// rfm
+	spi *machine.SPI
+
+	rst  machine.Pin
+	intr machine.Pin
+
+	sck machine.Pin
+	sdo machine.Pin
+	sdi machine.Pin
+	csn machine.Pin
+
+	// i2c
+	sda machine.Pin
+	scl machine.Pin
+}
+
+var pico = pinCfg{
+	spi: machine.SPI0,
+
+	rst:  machine.GP6,
+	intr: machine.GP7,
+
+	sck: machine.GP2,
+	sdo: machine.GP3,
+	sdi: machine.GP4,
+	csn: machine.GP5,
+
+	sda: machine.GP0,
+	scl: machine.GP1,
+}
+
+var cfg = pico
+
 func Run(logs *rpc.Queue) error {
 	i2c := machine.I2C0
 
 	err := i2c.Configure(machine.I2CConfig{
-		SDA: machine.GP0,
-		SCL: machine.GP1,
+		SDA: cfg.sda,
+		SCL: cfg.scl,
 	})
 	if err != nil {
 		return errors.Wrap(err, "configure i2c")
@@ -72,15 +106,15 @@ func Run(logs *rpc.Queue) error {
 }
 
 func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
-	rst := machine.GP6
+	rst := cfg.rst
 	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
-	spi := machine.SPI0
+	spi := cfg.spi
 	err := spi.Configure(machine.SPIConfig{
 		Mode: machine.Mode3,
-		SCK:  machine.GP2,
-		SDO:  machine.GP3,
-		SDI:  machine.GP4,
+		SCK:  cfg.sck,
+		SDO:  cfg.sdo,
+		SDI:  cfg.sdi,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "configure SPI")
@@ -88,7 +122,7 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 		log("setup SPI")
 	}
 
-	CSn := machine.GP5
+	CSn := cfg.csn
 	CSn.Set(true)
 	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	CSn.Set(true)
@@ -97,7 +131,7 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 		spi,
 		rst,
 		CSn,
-		machine.GP7,
+		cfg.intr,
 		log,
 	)
 	if err != nil {
