@@ -2,7 +2,7 @@ module uc-go
 
 go 1.19
 
-replace github.com/cacktopus/theheads => ../heads
+replace github.com/minor-industries/theheads => ../heads
 
 replace github.com/minor-industries/rfm69 => ../minor-industries/rfm69
 
