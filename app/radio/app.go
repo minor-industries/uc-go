@@ -55,7 +55,7 @@ type pinCfg struct {
 var featherRp2040 = pinCfg{
 	spi:  machine.SPI1,
 	rst:  machine.GPIO17,
-	intr: machine.GPIO18,
+	intr: machine.GPIO21,
 	sck:  machine.GPIO14,
 	sdo:  machine.GPIO15,
 	sdi:  machine.GPIO8,
@@ -87,10 +87,25 @@ func Run(logs *rpc.Queue) error {
 		logs.Log(s)
 	}
 
+	err = runRadio(logs, log, sensor)
+	if err != nil {
+		return errors.Wrap(err, "run radio")
+	}
+
+	return errors.New("run exited")
+}
+
+func runRadio(
+	logs *rpc.Queue,
+	log func(s string),
+	sensor aht20.Device,
+) error {
 	radio, err := setupRfm69(log)
 	if err != nil {
 		return errors.Wrap(err, "rfm69")
 	}
+
+	return errors.New("there-01")
 
 	ticker := time.NewTicker(5 * time.Second)
 	for range ticker.C {
@@ -118,7 +133,7 @@ func Run(logs *rpc.Queue) error {
 		}
 	}
 
-	return errors.New("run exited")
+	return nil
 }
 
 func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
@@ -132,6 +147,11 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 		SDO:  cfg.sdo,
 		SDI:  cfg.sdi,
 	})
+
+	log("hello")
+
+	//return nil, err
+
 	if err != nil {
 		return nil, errors.Wrap(err, "configure SPI")
 	} else {
@@ -139,11 +159,15 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 	}
 
 	CSn := cfg.csn
-	CSn.Set(true)
-	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
 	CSn.Set(true)
 
-	board, err := rfm69_board.NewBoard(
+	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	//machine.GPIO16.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	CSn.Set(true)
+
+	_, err = rfm69_board.NewBoard(
 		spi,
 		rst,
 		CSn,
@@ -154,11 +178,13 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 		return nil, errors.Wrap(err, "new board")
 	}
 
-	radio := rfm69.NewRadio(board, log)
-
-	if err := radio.Setup(rfm69.RF69_915MHZ); err != nil {
-		return nil, errors.Wrap(err, "setup")
-	}
-
-	return radio, nil
+	return nil, errors.New("error-01")
+	//
+	//radio := rfm69.NewRadio(board, log)
+	//
+	//if err := radio.Setup(rfm69.RF69_915MHZ); err != nil {
+	//	return nil, errors.Wrap(err, "setup")
+	//}
+	//
+	//return radio, nil
 }
