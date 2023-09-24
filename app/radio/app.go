@@ -105,8 +105,6 @@ func runRadio(
 		return errors.Wrap(err, "rfm69")
 	}
 
-	return errors.New("there-01")
-
 	ticker := time.NewTicker(5 * time.Second)
 	for range ticker.C {
 		err := sensor.Read()
@@ -167,7 +165,7 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 
 	CSn.Set(true)
 
-	_, err = rfm69_board.NewBoard(
+	board, err := rfm69_board.NewBoard(
 		spi,
 		rst,
 		CSn,
@@ -178,13 +176,13 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 		return nil, errors.Wrap(err, "new board")
 	}
 
-	return nil, errors.New("error-01")
-	//
-	//radio := rfm69.NewRadio(board, log)
-	//
-	//if err := radio.Setup(rfm69.RF69_915MHZ); err != nil {
-	//	return nil, errors.Wrap(err, "setup")
-	//}
-	//
-	//return radio, nil
+	//return nil, errors.New("error-01")
+
+	radio := rfm69.NewRadio(board, log)
+
+	if err := radio.Setup(rfm69.RF69_915MHZ); err != nil {
+		return nil, errors.Wrap(err, "setup")
+	}
+
+	return radio, nil
 }
