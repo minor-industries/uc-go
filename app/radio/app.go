@@ -34,6 +34,9 @@ type pinCfg struct {
 	i2c *machine.I2C
 	sda machine.Pin
 	scl machine.Pin
+
+	// misc
+	led machine.Pin
 }
 
 //var pico = pinCfg{
@@ -64,11 +67,25 @@ var featherRp2040 = pinCfg{
 	i2c: machine.I2C1,
 	sda: machine.GPIO2,
 	scl: machine.GPIO3,
+
+	led: machine.GPIO13,
 }
 
 var cfg = featherRp2040
 
 func Run(logs *rpc.Queue) error {
+	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	go func() {
+		ticker := time.NewTicker(100 * time.Millisecond)
+		val := true
+
+		for range ticker.C {
+			cfg.led.Set(val)
+			val = !val
+		}
+	}()
+
 	i2c := cfg.i2c
 
 	err := i2c.Configure(machine.I2CConfig{
