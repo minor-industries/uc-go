@@ -31,29 +31,45 @@ type pinCfg struct {
 	csn machine.Pin
 
 	// i2c
+	i2c *machine.I2C
 	sda machine.Pin
 	scl machine.Pin
 }
 
-var pico = pinCfg{
-	spi: machine.SPI0,
+//var pico = pinCfg{
+//	spi: machine.SPI0,
+//
+//	rst:  machine.GP6,
+//	intr: machine.GP7,
+//
+//	sck: machine.GP2,
+//	sdo: machine.GP3,
+//	sdi: machine.GP4,
+//	csn: machine.GP5,
+//
+//	i2c: machine.I2C0,
+//	sda: machine.GP0,
+//	scl: machine.GP1,
+//}
 
-	rst:  machine.GP6,
-	intr: machine.GP7,
+var featherRp2040 = pinCfg{
+	spi:  machine.SPI1,
+	rst:  machine.GPIO17,
+	intr: machine.GPIO18,
+	sck:  machine.GPIO14,
+	sdo:  machine.GPIO15,
+	sdi:  machine.GPIO8,
+	csn:  machine.GPIO16,
 
-	sck: machine.GP2,
-	sdo: machine.GP3,
-	sdi: machine.GP4,
-	csn: machine.GP5,
-
-	sda: machine.GP0,
-	scl: machine.GP1,
+	i2c: machine.I2C1,
+	sda: machine.GPIO2,
+	scl: machine.GPIO3,
 }
 
-var cfg = pico
+var cfg = featherRp2040
 
 func Run(logs *rpc.Queue) error {
-	i2c := machine.I2C0
+	i2c := cfg.i2c
 
 	err := i2c.Configure(machine.I2CConfig{
 		SDA: cfg.sda,
