@@ -39,40 +39,6 @@ type pinCfg struct {
 	led machine.Pin
 }
 
-//var pico = pinCfg{
-//	spi: machine.SPI0,
-//
-//	rst:  machine.GP6,
-//	intr: machine.GP7,
-//
-//	sck: machine.GP2,
-//	sdo: machine.GP3,
-//	sdi: machine.GP4,
-//	csn: machine.GP5,
-//
-//	i2c: machine.I2C0,
-//	sda: machine.GP0,
-//	scl: machine.GP1,
-//}
-
-var featherRp2040 = pinCfg{
-	spi:  machine.SPI1,
-	rst:  machine.GPIO17,
-	intr: machine.GPIO21,
-	sck:  machine.GPIO14,
-	sdo:  machine.GPIO15,
-	sdi:  machine.GPIO8,
-	csn:  machine.GPIO16,
-
-	i2c: machine.I2C1,
-	sda: machine.GPIO2,
-	scl: machine.GPIO3,
-
-	led: machine.GPIO13,
-}
-
-var cfg = featherRp2040
-
 func Run(logs *rpc.Queue) error {
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
