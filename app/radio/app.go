@@ -13,30 +13,12 @@ import (
 	rfm69_board "uc-go/pkg/rfm69-board"
 )
 
+const srcAddr = 0x11
+
 type SensorData struct {
 	Temperature      float32 // celsius
 	RelativeHumidity float32
-}
-
-type pinCfg struct {
-	// rfm
-	spi *machine.SPI
-
-	rst  machine.Pin
-	intr machine.Pin
-
-	sck machine.Pin
-	sdo machine.Pin
-	sdi machine.Pin
-	csn machine.Pin
-
-	// i2c
-	i2c *machine.I2C
-	sda machine.Pin
-	scl machine.Pin
-
-	// misc
-	led machine.Pin
+	Reserved         byte // TODO: workaround for last-byte issue on rfm69
 }
 
 func Run(logs *rpc.Queue) error {
@@ -109,7 +91,7 @@ func runRadio(
 			return errors.Wrap(err, "encode body")
 		}
 
-		if err := radio.SendFrame(2, 1, bodyBuf.Bytes()); err != nil {
+		if err := radio.SendFrame(2, srcAddr, bodyBuf.Bytes()); err != nil {
 			logs.Error(errors.Wrap(err, "send frame"))
 		}
 	}
