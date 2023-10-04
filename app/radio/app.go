@@ -14,8 +14,6 @@ import (
 	rfm69_board "uc-go/pkg/rfm69-board"
 )
 
-const srcAddr = 0x11
-
 type SensorData struct {
 	Temperature      float32 // celsius
 	RelativeHumidity float32

@@ -21,3 +21,5 @@ var cfg = pinCfg{
 
 	led: machine.LED,
 }
+
+const srcAddr = 0x01
