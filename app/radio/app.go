@@ -7,6 +7,7 @@ import (
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
+	"math/rand"
 	"time"
 	"tinygo.org/x/drivers/aht20"
 	"uc-go/pkg/protocol/rpc"
@@ -65,13 +66,14 @@ func runRadio(
 	log func(s string),
 	sensor aht20.Device,
 ) error {
+	randSource := rand.New(rand.NewSource(srcAddr))
+
 	radio, err := setupRfm69(log)
 	if err != nil {
 		return errors.Wrap(err, "rfm69")
 	}
 
-	ticker := time.NewTicker(5 * time.Second)
-	for range ticker.C {
+	for {
 		err := sensor.Read()
 		if err != nil {
 			logs.Error(errors.Wrap(err, "read sensor"))
@@ -94,9 +96,10 @@ func runRadio(
 		if err := radio.SendFrame(2, srcAddr, bodyBuf.Bytes()); err != nil {
 			logs.Error(errors.Wrap(err, "send frame"))
 		}
-	}
 
-	return nil
+		sleep := time.Duration(4000+randSource.Intn(2000)) * time.Millisecond
+		time.Sleep(sleep)
+	}
 }
 
 func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
