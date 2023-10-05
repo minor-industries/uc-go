@@ -14,6 +14,8 @@ import (
 	rfm69_board "uc-go/pkg/rfm69-board"
 )
 
+const txPower = 20
+
 type SensorData struct {
 	Temperature      float32 // celsius
 	RelativeHumidity float32
@@ -91,7 +93,12 @@ func runRadio(
 			return errors.Wrap(err, "encode body")
 		}
 
-		if err := radio.SendFrame(2, srcAddr, bodyBuf.Bytes()); err != nil {
+		if err := radio.SendFrame(
+			2,
+			srcAddr,
+			txPower,
+			bodyBuf.Bytes(),
+		); err != nil {
 			logs.Error(errors.Wrap(err, "send frame"))
 		}
 
