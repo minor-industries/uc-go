@@ -12,6 +12,7 @@ import (
 	"tinygo.org/x/drivers/aht20"
 	"uc-go/pkg/protocol/rpc"
 	rfm69_board "uc-go/pkg/rfm69-board"
+	"uc-go/pkg/schema"
 )
 
 const (
@@ -19,11 +20,6 @@ const (
 
 	srcAddr = 0x14
 )
-
-type SensorData struct {
-	Temperature      float32 // celsius
-	RelativeHumidity float32
-}
 
 func Run(logs *rpc.Queue) error {
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
@@ -85,7 +81,7 @@ func runRadio(
 		t := sensor.Celsius()
 		logs.Log(fmt.Sprintf("temperature = %0.01fC %0.01fF", t, (t*9/5)+32))
 
-		body := &SensorData{
+		body := &schema.SensorData{
 			Temperature:      t,
 			RelativeHumidity: sensor.RelHumidity(),
 		}
