@@ -43,5 +43,3 @@ var cfg2 = pinCfg{
 }
 
 var cfg = cfg2
-
-const srcAddr = 0x11

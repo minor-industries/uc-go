@@ -14,12 +14,15 @@ import (
 	rfm69_board "uc-go/pkg/rfm69-board"
 )
 
-const txPower = 20
+const (
+	txPower = 20
+
+	srcAddr = 0x14
+)
 
 type SensorData struct {
 	Temperature      float32 // celsius
 	RelativeHumidity float32
-	Reserved         byte // TODO: workaround for last-byte issue on rfm69
 }
 
 func Run(logs *rpc.Queue) error {
