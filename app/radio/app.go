@@ -10,18 +10,46 @@ import (
 	"math/rand"
 	"time"
 	"tinygo.org/x/drivers/aht20"
+	cfg3 "uc-go/app/radio/cfg"
 	"uc-go/pkg/protocol/rpc"
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/schema"
+	"uc-go/pkg/storage"
+	"uc-go/pkg/util"
 )
 
 const (
-	txPower = 20
+	configFile = "/radio-cfg.msgp"
 
-	srcAddr = 0x14
+	initialTxPower  = 20
+	initialNodeAddr = 0xee
 )
 
 func Run(logs *rpc.Queue) error {
+	lfs, err := storage.Setup(logs)
+	if err != nil {
+		return errors.Wrap(err, "setup storage")
+	}
+
+	if lfs == nil {
+		return errors.New("no lfs")
+	}
+
+	config, err := storage.LoadConfig[*cfg3.Config](
+		lfs,
+		logs,
+		configFile,
+		&cfg3.Config{
+			NodeAddr: initialNodeAddr,
+			TxPower:  initialTxPower,
+		},
+	)
+	if err != nil {
+		return errors.Wrap(err, "load config")
+	}
+
+	env := util.NewSyncConfig(*config)
+
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
 	go func() {
@@ -36,7 +64,7 @@ func Run(logs *rpc.Queue) error {
 
 	i2c := cfg.i2c
 
-	err := i2c.Configure(machine.I2CConfig{
+	err = i2c.Configure(machine.I2CConfig{
 		SDA: cfg.sda,
 		SCL: cfg.scl,
 	})
@@ -52,7 +80,7 @@ func Run(logs *rpc.Queue) error {
 		logs.Log(s)
 	}
 
-	err = runRadio(logs, log, sensor)
+	err = runRadio(logs, env, log, sensor)
 	if err != nil {
 		return errors.Wrap(err, "run radio")
 	}
@@ -62,10 +90,12 @@ func Run(logs *rpc.Queue) error {
 
 func runRadio(
 	logs *rpc.Queue,
+	env *util.SyncConfig[cfg3.Config],
 	log func(s string),
 	sensor aht20.Device,
 ) error {
-	randSource := rand.New(rand.NewSource(srcAddr))
+	envSnapshot := env.SnapShot()
+	randSource := rand.New(rand.NewSource(int64(envSnapshot.NodeAddr)))
 
 	radio, err := setupRfm69(log)
 	if err != nil {
@@ -94,8 +124,8 @@ func runRadio(
 
 		if err := radio.SendFrame(
 			2,
-			srcAddr,
-			txPower,
+			envSnapshot.NodeAddr,
+			envSnapshot.TxPower,
 			bodyBuf.Bytes(),
 		); err != nil {
 			logs.Error(errors.Wrap(err, "send frame"))
@@ -112,7 +142,7 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 
 	spi := cfg.spi
 	err := spi.Configure(machine.SPIConfig{
-		Mode: machine.Mode3,
+		Mode: machine.Mode0,
 		SCK:  cfg.sck,
 		SDO:  cfg.sdo,
 		SDI:  cfg.sdi,
