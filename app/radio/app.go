@@ -52,14 +52,11 @@ func Run(logs *rpc.Queue) error {
 
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
+	stopLeds := make(chan struct{})
+	go ledControl(stopLeds)
 	go func() {
-		ticker := time.NewTicker(100 * time.Millisecond)
-		val := true
-
-		for range ticker.C {
-			cfg.led.Set(val)
-			val = !val
-		}
+		time.Sleep(5 * time.Second)
+		close(stopLeds)
 	}()
 
 	i2c := cfg.i2c
@@ -86,6 +83,21 @@ func Run(logs *rpc.Queue) error {
 	}
 
 	return errors.New("run exited")
+}
+
+func ledControl(done <-chan struct{}) {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	val := true
+
+	for {
+		select {
+		case <-ticker.C:
+			cfg.led.Set(val)
+			val = !val
+		case <-done:
+			return
+		}
+	}
 }
 
 func runRadio(
