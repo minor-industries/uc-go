@@ -55,7 +55,7 @@ func Run(logs *rpc.Queue) error {
 	stopLeds := make(chan struct{})
 	go ledControl(stopLeds)
 	go func() {
-		time.Sleep(5 * time.Second)
+		<-time.After(5 * time.Second)
 		close(stopLeds)
 	}()
 
