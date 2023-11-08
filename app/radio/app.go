@@ -13,7 +13,6 @@ import (
 	rfm69_board "uc-go/pkg/rfm69-board"
 	cfg3 "uc-go/pkg/rfm69-board/cfg"
 	"uc-go/pkg/schema"
-	"uc-go/pkg/util"
 )
 
 func Run(logs *rpc.Queue) error {
@@ -49,7 +48,14 @@ func Run(logs *rpc.Queue) error {
 		logs.Log(s)
 	}
 
-	err = runRadio(logs, env, log, sensor)
+	envSnapshot := env.SnapShot()
+
+	err = runRadio(
+		logs,
+		&envSnapshot,
+		log,
+		sensor,
+	)
 	if err != nil {
 		return errors.Wrap(err, "run radio")
 	}
@@ -74,14 +80,13 @@ func ledControl(done <-chan struct{}) {
 
 func runRadio(
 	logs *rpc.Queue,
-	env *util.SyncConfig[cfg3.Config],
+	env *cfg3.Config,
 	log func(s string),
 	sensor aht20.Device,
 ) error {
-	envSnapshot := env.SnapShot()
-	randSource := rand.New(rand.NewSource(int64(envSnapshot.NodeAddr)))
+	randSource := rand.New(rand.NewSource(int64(env.NodeAddr)))
 
-	radio, err := rfm69_board.SetupRfm69(&cfg.Rfm, log)
+	radio, err := rfm69_board.SetupRfm69(env, &cfg.Rfm, log)
 	if err != nil {
 		return errors.Wrap(err, "rfm69")
 	}
@@ -108,8 +113,8 @@ func runRadio(
 
 		if err := radio.SendFrame(
 			2,
-			envSnapshot.NodeAddr,
-			envSnapshot.TxPower,
+			env.NodeAddr,
+			env.TxPower,
 			bodyBuf.Bytes(),
 		); err != nil {
 			logs.Error(errors.Wrap(err, "send frame"))

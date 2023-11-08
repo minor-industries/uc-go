@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 	"uc-go/pkg/protocol/rpc"
-	cfg3 "uc-go/pkg/rfm69-board/cfg"
+	"uc-go/pkg/rfm69-board/cfg"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
 )
@@ -101,6 +101,7 @@ type PinCfg struct {
 }
 
 func SetupRfm69(
+	env *cfg.Config,
 	cfg *PinCfg,
 	log func(s string),
 ) (*rfm69.Radio, error) {
@@ -159,7 +160,7 @@ const (
 )
 
 func LoadConfig(logs *rpc.Queue) (
-	*util.SyncConfig[cfg3.Config],
+	*util.SyncConfig[cfg.Config],
 	error,
 ) {
 	lfs, err := storage.Setup(logs)
@@ -171,11 +172,11 @@ func LoadConfig(logs *rpc.Queue) (
 		return nil, errors.New("no lfs")
 	}
 
-	config, err := storage.LoadConfig[*cfg3.Config](
+	config, err := storage.LoadConfig[*cfg.Config](
 		lfs,
 		logs,
 		configFile,
-		&cfg3.Config{
+		&cfg.Config{
 			NodeAddr: initialNodeAddr,
 			TxPower:  initialTxPower,
 		},
