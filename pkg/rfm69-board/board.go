@@ -7,6 +7,10 @@ import (
 	"machine"
 	"sync/atomic"
 	"time"
+	"uc-go/pkg/protocol/rpc"
+	cfg3 "uc-go/pkg/rfm69-board/cfg"
+	"uc-go/pkg/storage"
+	"uc-go/pkg/util"
 )
 
 type Board struct {
@@ -145,4 +149,41 @@ func SetupRfm69(
 	}
 
 	return radio, nil
+}
+
+const (
+	configFile = "/radio-cfg.msgp"
+
+	initialTxPower  = 20
+	initialNodeAddr = 0xee
+)
+
+func LoadConfig(logs *rpc.Queue) (
+	*util.SyncConfig[cfg3.Config],
+	error,
+) {
+	lfs, err := storage.Setup(logs)
+	if err != nil {
+		return nil, errors.Wrap(err, "setup storage")
+	}
+
+	if lfs == nil {
+		return nil, errors.New("no lfs")
+	}
+
+	config, err := storage.LoadConfig[*cfg3.Config](
+		lfs,
+		logs,
+		configFile,
+		&cfg3.Config{
+			NodeAddr: initialNodeAddr,
+			TxPower:  initialTxPower,
+		},
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "load config")
+	}
+
+	env := util.NewSyncConfig(*config)
+	return env, nil
 }

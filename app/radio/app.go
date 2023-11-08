@@ -9,23 +9,15 @@ import (
 	"math/rand"
 	"time"
 	"tinygo.org/x/drivers/aht20"
-	cfg3 "uc-go/app/radio/cfg"
 	"uc-go/pkg/protocol/rpc"
 	rfm69_board "uc-go/pkg/rfm69-board"
+	cfg3 "uc-go/pkg/rfm69-board/cfg"
 	"uc-go/pkg/schema"
-	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
 )
 
-const (
-	configFile = "/radio-cfg.msgp"
-
-	initialTxPower  = 20
-	initialNodeAddr = 0xee
-)
-
 func Run(logs *rpc.Queue) error {
-	env, err := loadConfig(logs)
+	env, err := rfm69_board.LoadConfig(logs)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
@@ -63,36 +55,6 @@ func Run(logs *rpc.Queue) error {
 	}
 
 	return errors.New("run exited")
-}
-
-func loadConfig(logs *rpc.Queue) (
-	*util.SyncConfig[cfg3.Config],
-	error,
-) {
-	lfs, err := storage.Setup(logs)
-	if err != nil {
-		return nil, errors.Wrap(err, "setup storage")
-	}
-
-	if lfs == nil {
-		return nil, errors.New("no lfs")
-	}
-
-	config, err := storage.LoadConfig[*cfg3.Config](
-		lfs,
-		logs,
-		configFile,
-		&cfg3.Config{
-			NodeAddr: initialNodeAddr,
-			TxPower:  initialTxPower,
-		},
-	)
-	if err != nil {
-		return nil, errors.Wrap(err, "load config")
-	}
-
-	env := util.NewSyncConfig(*config)
-	return env, nil
 }
 
 func ledControl(done <-chan struct{}) {
