@@ -2,19 +2,23 @@
 
 package radio
 
-import "machine"
+import (
+	"machine"
+	rfm69_board "uc-go/pkg/rfm69-board"
+)
 
-var cfg = pinCfg{
-	spi: machine.SPI0,
+var cfg = BoardCfg{
+	Rfm: rfm69_board.PinCfg{
+		Spi: machine.SPI0,
 
-	rst:  machine.GP6,
-	intr: machine.GP7,
+		Rst:  machine.GP6,
+		Intr: machine.GP7,
 
-	sck: machine.GP2,
-	sdo: machine.GP3,
-	sdi: machine.GP4,
-	csn: machine.GP5,
-
+		Sck: machine.GP2,
+		Sdo: machine.GP3,
+		Sdi: machine.GP4,
+		Csn: machine.GP5,
+	},
 	i2c: machine.I2C0,
 	sda: machine.GP0,
 	scl: machine.GP1,

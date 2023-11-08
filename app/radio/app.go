@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"math/rand"
@@ -109,7 +108,7 @@ func runRadio(
 	envSnapshot := env.SnapShot()
 	randSource := rand.New(rand.NewSource(int64(envSnapshot.NodeAddr)))
 
-	radio, err := setupRfm69(log)
+	radio, err := rfm69_board.SetupRfm69(&cfg.Rfm, log)
 	if err != nil {
 		return errors.Wrap(err, "rfm69")
 	}
@@ -146,57 +145,4 @@ func runRadio(
 		sleep := time.Duration(4000+randSource.Intn(2000)) * time.Millisecond
 		time.Sleep(sleep)
 	}
-}
-
-func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
-	rst := cfg.rst
-	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	spi := cfg.spi
-	err := spi.Configure(machine.SPIConfig{
-		Mode: machine.Mode0,
-		SCK:  cfg.sck,
-		SDO:  cfg.sdo,
-		SDI:  cfg.sdi,
-	})
-
-	log("hello")
-
-	//return nil, err
-
-	if err != nil {
-		return nil, errors.Wrap(err, "configure SPI")
-	} else {
-		log("setup SPI")
-	}
-
-	CSn := cfg.csn
-
-	CSn.Set(true)
-
-	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	//machine.GPIO16.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	CSn.Set(true)
-
-	board, err := rfm69_board.NewBoard(
-		spi,
-		rst,
-		CSn,
-		cfg.intr,
-		log,
-	)
-	if err != nil {
-		return nil, errors.Wrap(err, "new board")
-	}
-
-	//return nil, errors.New("error-01")
-
-	radio := rfm69.NewRadio(board, log)
-
-	if err := radio.Setup(rfm69.RF69_433MHZ); err != nil {
-		return nil, errors.Wrap(err, "setup")
-	}
-
-	return radio, nil
 }

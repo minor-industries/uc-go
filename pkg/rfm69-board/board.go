@@ -2,6 +2,7 @@ package rfm69_board
 
 import (
 	"fmt"
+	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"sync/atomic"
@@ -80,4 +81,68 @@ func (b *Board) handleInterrupt(pin machine.Pin) {
 	default:
 		atomic.AddUint32(&b.unhandledCount, 1)
 	}
+}
+
+type PinCfg struct {
+	// rfm
+	Spi *machine.SPI
+
+	Rst  machine.Pin
+	Intr machine.Pin
+
+	Sck machine.Pin
+	Sdo machine.Pin
+	Sdi machine.Pin
+	Csn machine.Pin
+}
+
+func SetupRfm69(
+	cfg *PinCfg,
+	log func(s string),
+) (*rfm69.Radio, error) {
+	rst := cfg.Rst
+	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	spi := cfg.Spi
+	err := spi.Configure(machine.SPIConfig{
+		Mode: machine.Mode0,
+		SCK:  cfg.Sck,
+		SDO:  cfg.Sdo,
+		SDI:  cfg.Sdi,
+	})
+
+	log("hello")
+
+	//return nil, err
+
+	if err != nil {
+		return nil, errors.Wrap(err, "configure SPI")
+	} else {
+		log("setup SPI")
+	}
+
+	CSn := cfg.Csn
+
+	CSn.Set(true)
+	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	CSn.Set(true)
+
+	board, err := NewBoard(
+		spi,
+		rst,
+		CSn,
+		cfg.Intr,
+		log,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "new board")
+	}
+
+	radio := rfm69.NewRadio(board, log)
+
+	if err := radio.Setup(rfm69.RF69_433MHZ); err != nil {
+		return nil, errors.Wrap(err, "setup")
+	}
+
+	return radio, nil
 }

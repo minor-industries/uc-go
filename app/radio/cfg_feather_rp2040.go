@@ -5,7 +5,7 @@ package radio
 import "machine"
 
 // feather with rfm69 built-in
-var cfg1 = pinCfg{
+var cfg1 = PinCfg{
 	spi: machine.SPI1,
 
 	rst:  machine.GPIO17,
@@ -24,7 +24,7 @@ var cfg1 = pinCfg{
 }
 
 // feather with rfm69 hat
-var cfg2 = pinCfg{
+var cfg2 = PinCfg{
 	spi: machine.SPI0,
 
 	rst:  machine.GPIO11,

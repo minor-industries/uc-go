@@ -1,20 +1,14 @@
 package radio
 
-import "machine"
+import (
+	"machine"
+	rfm69_board "uc-go/pkg/rfm69-board"
+)
 
-type pinCfg struct {
-	// rfm
-	spi *machine.SPI
-
-	rst  machine.Pin
-	intr machine.Pin
-
-	sck machine.Pin
-	sdo machine.Pin
-	sdi machine.Pin
-	csn machine.Pin
-
+type BoardCfg struct {
 	// i2c
+	Rfm rfm69_board.PinCfg
+
 	i2c *machine.I2C
 	sda machine.Pin
 	scl machine.Pin
