@@ -25,29 +25,10 @@ const (
 )
 
 func Run(logs *rpc.Queue) error {
-	lfs, err := storage.Setup(logs)
-	if err != nil {
-		return errors.Wrap(err, "setup storage")
-	}
-
-	if lfs == nil {
-		return errors.New("no lfs")
-	}
-
-	config, err := storage.LoadConfig[*cfg3.Config](
-		lfs,
-		logs,
-		configFile,
-		&cfg3.Config{
-			NodeAddr: initialNodeAddr,
-			TxPower:  initialTxPower,
-		},
-	)
+	env, err := loadConfig(logs)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
-
-	env := util.NewSyncConfig(*config)
 
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
@@ -82,6 +63,36 @@ func Run(logs *rpc.Queue) error {
 	}
 
 	return errors.New("run exited")
+}
+
+func loadConfig(logs *rpc.Queue) (
+	*util.SyncConfig[cfg3.Config],
+	error,
+) {
+	lfs, err := storage.Setup(logs)
+	if err != nil {
+		return nil, errors.Wrap(err, "setup storage")
+	}
+
+	if lfs == nil {
+		return nil, errors.New("no lfs")
+	}
+
+	config, err := storage.LoadConfig[*cfg3.Config](
+		lfs,
+		logs,
+		configFile,
+		&cfg3.Config{
+			NodeAddr: initialNodeAddr,
+			TxPower:  initialTxPower,
+		},
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "load config")
+	}
+
+	env := util.NewSyncConfig(*config)
+	return env, nil
 }
 
 func ledControl(done <-chan struct{}) {
