@@ -194,7 +194,7 @@ func setupRfm69(log func(s string)) (*rfm69.Radio, error) {
 
 	radio := rfm69.NewRadio(board, log)
 
-	if err := radio.Setup(rfm69.RF69_915MHZ); err != nil {
+	if err := radio.Setup(rfm69.RF69_433MHZ); err != nil {
 		return nil, errors.Wrap(err, "setup")
 	}
 
