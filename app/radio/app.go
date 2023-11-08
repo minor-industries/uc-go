@@ -113,8 +113,6 @@ func runRadio(
 
 		if err := radio.SendFrame(
 			2,
-			env.NodeAddr,
-			env.TxPower,
 			bodyBuf.Bytes(),
 		); err != nil {
 			logs.Error(errors.Wrap(err, "send frame"))

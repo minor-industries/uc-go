@@ -143,7 +143,7 @@ func SetupRfm69(
 		return nil, errors.Wrap(err, "new board")
 	}
 
-	radio := rfm69.NewRadio(board, log)
+	radio := rfm69.NewRadio(board, log, env.NodeAddr, env.TxPower)
 
 	if err := radio.Setup(rfm69.RF69_433MHZ); err != nil {
 		return nil, errors.Wrap(err, "setup")
