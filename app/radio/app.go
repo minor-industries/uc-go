@@ -91,11 +91,10 @@ func runRadio(
 		return errors.Wrap(err, "rfm69")
 	}
 
-	for {
+	readAndSend := func() error {
 		err := sensor.Read()
 		if err != nil {
-			logs.Error(errors.Wrap(err, "read sensor"))
-			continue
+			return errors.Wrap(err, "read sensor")
 		}
 		t := sensor.Celsius()
 		logs.Log(fmt.Sprintf("temperature = %0.01fC %0.01fF", t, (t*9/5)+32))
@@ -115,7 +114,15 @@ func runRadio(
 			2,
 			bodyBuf.Bytes(),
 		); err != nil {
-			logs.Error(errors.Wrap(err, "send frame"))
+			return errors.Wrap(err, "send frame")
+		}
+
+		return nil
+	}
+
+	for {
+		if err := readAndSend(); err != nil {
+			logs.Error(err)
 		}
 
 		sleep := time.Duration(4000+randSource.Intn(2000)) * time.Millisecond
