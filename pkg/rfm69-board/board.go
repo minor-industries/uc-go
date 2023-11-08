@@ -5,6 +5,7 @@ import (
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
+	"sync"
 	"sync/atomic"
 	"time"
 	"uc-go/pkg/protocol/rpc"
@@ -14,7 +15,9 @@ import (
 )
 
 type Board struct {
-	spi  *machine.SPI
+	spi     *machine.SPI
+	spiLock *sync.Mutex
+
 	rst  machine.Pin
 	csn  machine.Pin
 	intr machine.Pin
@@ -29,6 +32,7 @@ type Board struct {
 
 func NewBoard(
 	spi *machine.SPI,
+	spiLock *sync.Mutex,
 	rst machine.Pin,
 	csn machine.Pin,
 	intr machine.Pin,
@@ -103,6 +107,7 @@ type PinCfg struct {
 func SetupRfm69(
 	env *cfg.Config,
 	cfg *PinCfg,
+	spiLock *sync.Mutex,
 	log func(s string),
 ) (*rfm69.Radio, error) {
 	rst := cfg.Rst
@@ -134,6 +139,7 @@ func SetupRfm69(
 
 	board, err := NewBoard(
 		spi,
+		spiLock,
 		rst,
 		CSn,
 		cfg.Intr,

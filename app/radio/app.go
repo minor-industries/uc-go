@@ -2,14 +2,15 @@ package radio
 
 import (
 	"fmt"
+	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"math/rand"
+	"sync"
 	"time"
 	"tinygo.org/x/drivers/aht20"
 	"uc-go/pkg/protocol/rpc"
 	rfm69_board "uc-go/pkg/rfm69-board"
-	cfg3 "uc-go/pkg/rfm69-board/cfg"
 	"uc-go/pkg/schema"
 )
 
@@ -49,15 +50,26 @@ func Run(logs *rpc.Queue) error {
 	}
 
 	envSnapshot := env.SnapShot()
+	spiLock := new(sync.Mutex)
 
-	err = runRadio(
-		logs,
+	radio, err := rfm69_board.SetupRfm69(
 		&envSnapshot,
+		&cfg.Rfm,
+		spiLock,
 		log,
+	)
+	if err != nil {
+		return errors.Wrap(err, "setup radio")
+	}
+
+	err = mainLoop(
+		logs,
+		radio,
+		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
 		sensor,
 	)
 	if err != nil {
-		return errors.Wrap(err, "run radio")
+		return errors.Wrap(err, "mainloop")
 	}
 
 	return errors.New("run exited")
@@ -78,19 +90,12 @@ func ledControl(done <-chan struct{}) {
 	}
 }
 
-func runRadio(
+func mainLoop(
 	logs *rpc.Queue,
-	env *cfg3.Config,
-	log func(s string),
+	radio *rfm69.Radio,
+	randSource *rand.Rand,
 	sensor aht20.Device,
 ) error {
-	randSource := rand.New(rand.NewSource(int64(env.NodeAddr)))
-
-	radio, err := rfm69_board.SetupRfm69(env, &cfg.Rfm, log)
-	if err != nil {
-		return errors.Wrap(err, "rfm69")
-	}
-
 	readAndSend := func() error {
 		err := sensor.Read()
 		if err != nil {

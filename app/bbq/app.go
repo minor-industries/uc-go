@@ -1,13 +1,14 @@
 package bbq
 
 import (
+	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"math/rand"
+	"sync"
 	"time"
 	"uc-go/pkg/protocol/rpc"
 	rfm69_board "uc-go/pkg/rfm69-board"
-	cfg3 "uc-go/pkg/rfm69-board/cfg"
 )
 
 const dstAddr = 2
@@ -32,11 +33,22 @@ func Run(logs *rpc.Queue) error {
 	}
 
 	envSnapshot := env.SnapShot()
+	spiLock := new(sync.Mutex)
+
+	radio, err := rfm69_board.SetupRfm69(
+		&envSnapshot,
+		&cfg.Rfm,
+		spiLock,
+		log,
+	)
+	if err != nil {
+		return errors.Wrap(err, "rfm69")
+	}
 
 	err = mainLoop(
 		logs,
-		&envSnapshot,
-		log,
+		radio,
+		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
 	)
 	if err != nil {
 		return errors.Wrap(err, "mainloop")
@@ -62,16 +74,9 @@ func ledControl(done <-chan struct{}) {
 
 func mainLoop(
 	logs *rpc.Queue,
-	env *cfg3.Config,
-	log func(s string),
+	radio *rfm69.Radio,
+	randSource *rand.Rand,
 ) error {
-	randSource := rand.New(rand.NewSource(int64(env.NodeAddr)))
-
-	_, err := rfm69_board.SetupRfm69(env, &cfg.Rfm, log)
-	if err != nil {
-		return errors.Wrap(err, "rfm69")
-	}
-
 	readAndSend := func() error {
 		return errors.New("read and send not implemented")
 	}
