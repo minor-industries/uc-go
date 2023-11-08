@@ -1,8 +1,6 @@
 package radio
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"github.com/pkg/errors"
 	"machine"
@@ -14,6 +12,8 @@ import (
 	cfg3 "uc-go/pkg/rfm69-board/cfg"
 	"uc-go/pkg/schema"
 )
+
+const dstAddr = 2
 
 func Run(logs *rpc.Queue) error {
 	env, err := rfm69_board.LoadConfig(logs)
@@ -104,20 +104,7 @@ func runRadio(
 			RelativeHumidity: sensor.RelHumidity(),
 		}
 
-		bodyBuf := bytes.NewBuffer(nil)
-		bodyBuf.WriteByte(1) // message ID
-		if err := binary.Write(bodyBuf, binary.LittleEndian, body); err != nil {
-			return errors.Wrap(err, "encode body")
-		}
-
-		if err := radio.SendFrame(
-			2,
-			bodyBuf.Bytes(),
-		); err != nil {
-			return errors.Wrap(err, "send frame")
-		}
-
-		return nil
+		return rfm69_board.SendMsg(radio, dstAddr, 1, body)
 	}
 
 	for {
