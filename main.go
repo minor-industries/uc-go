@@ -5,7 +5,7 @@ package main
 import (
 	"github.com/pkg/errors"
 	"os"
-	"uc-go/app/radio"
+	"uc-go/app/bbq"
 	"uc-go/pkg/protocol/rpc"
 )
 
@@ -20,7 +20,7 @@ func main() {
 	})
 	go rpc.DecodeFrames(logs, router)
 
-	if err := radio.Run(logs); err != nil {
+	if err := bbq.Run(logs); err != nil {
 		logs.Error(errors.Wrap(err, "run"))
 	}
 
