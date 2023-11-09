@@ -24,7 +24,7 @@ var cfg = BoardCfg{
 	Rfm: rfm69_board.PinCfg{
 		Spi: machine.SPI0,
 		SpiCfg: &machine.SPIConfig{
-			Mode: 3,
+			Mode: 0,
 			SCK:  machine.GPIO2,
 			SDO:  machine.GPIO3,
 			SDI:  machine.GPIO4,
@@ -32,7 +32,7 @@ var cfg = BoardCfg{
 
 		Rst:  machine.GPIO6,
 		Intr: machine.GPIO7,
-		Csn:  machine.GPIO5,
+		Csn:  machine.GPIO9,
 	},
 
 	led: machine.LED,

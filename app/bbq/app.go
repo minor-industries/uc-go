@@ -59,8 +59,9 @@ func Run(logs *rpc.Queue) error {
 		logs.Log(s)
 	}
 
-	cfg.Tc.Csn.Set(true)
 	cfg.Tc.Csn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	cfg.Tc.Csn.Set(true)
+
 	tc := max31856.NewMAX31856(&tcBoard{
 		spi:     cfg.Tc.Spi,
 		spiLock: spiLock,
