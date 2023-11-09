@@ -11,31 +11,10 @@ import (
 	"time"
 	"uc-go/pkg/protocol/rpc"
 	rfm69_board "uc-go/pkg/rfm69-board"
+	"uc-go/pkg/spi"
 )
 
 const dstAddr = 2
-
-type tcBoard struct {
-	spi     *machine.SPI
-	spiCfg  *machine.SPIConfig
-	spiLock *sync.Mutex
-	csn     machine.Pin
-}
-
-func (t *tcBoard) TxSPI(w, r []byte) error {
-	t.spiLock.Lock()
-	defer t.spiLock.Unlock()
-
-	if err := t.spi.Configure(*t.spiCfg); err != nil {
-		return errors.Wrap(err, "configure spi")
-	}
-
-	t.csn.Low()
-	err := t.spi.Tx(w, r)
-	t.csn.High()
-
-	return err
-}
 
 func Run(logs *rpc.Queue) error {
 	stopLeds := make(chan struct{})
@@ -59,20 +38,9 @@ func Run(logs *rpc.Queue) error {
 		logs.Log(s)
 	}
 
-	cfg.Tc.Csn.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	cfg.Tc.Csn.Set(true)
+	boardSpi := spi.NewSPI(cfg.Tc, spiLock)
 
-	tc := max31856.NewMAX31856(&tcBoard{
-		spi:     cfg.Tc.Spi,
-		spiLock: spiLock,
-		spiCfg: &machine.SPIConfig{
-			Mode: 1,
-			SCK:  machine.GPIO2,
-			SDO:  machine.GPIO3,
-			SDI:  machine.GPIO4,
-		},
-		csn: cfg.Tc.Csn,
-	}, log)
+	tc := max31856.NewMAX31856(boardSpi, log)
 
 	radio, err := rfm69_board.SetupRfm69(
 		&envSnapshot,

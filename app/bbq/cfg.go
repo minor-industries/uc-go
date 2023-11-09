@@ -3,12 +3,8 @@ package bbq
 import (
 	"machine"
 	rfm69_board "uc-go/pkg/rfm69-board"
+	"uc-go/pkg/spi"
 )
-
-type TCCfg struct {
-	Spi *machine.SPI
-	Csn machine.Pin
-}
 
 type BoardCfg struct {
 	// i2c
@@ -17,7 +13,7 @@ type BoardCfg struct {
 	// misc
 	led machine.Pin
 
-	Tc TCCfg
+	Tc *spi.Config
 }
 
 var cfg = BoardCfg{
@@ -37,8 +33,14 @@ var cfg = BoardCfg{
 
 	led: machine.LED,
 
-	Tc: TCCfg{
+	Tc: &spi.Config{
 		Spi: machine.SPI0,
-		Csn: machine.GPIO8,
+		Config: &machine.SPIConfig{
+			Mode: 1,
+			SCK:  machine.GPIO2,
+			SDO:  machine.GPIO3,
+			SDI:  machine.GPIO4,
+		},
+		Cs: machine.GPIO8,
 	},
 }
