@@ -13,14 +13,12 @@ import (
 
 type PinCfg struct {
 	// rfm
-	Spi *machine.SPI
+	Spi    *machine.SPI
+	SpiCfg *machine.SPIConfig
 
 	Rst  machine.Pin
 	Intr machine.Pin
 
-	Sck machine.Pin
-	Sdo machine.Pin
-	Sdi machine.Pin
 	Csn machine.Pin
 }
 
@@ -34,34 +32,17 @@ func SetupRfm69(
 	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
 	spi := cfg.Spi
-	err := spi.Configure(machine.SPIConfig{
-		Mode: machine.Mode0,
-		SCK:  cfg.Sck,
-		SDO:  cfg.Sdo,
-		SDI:  cfg.Sdi,
-	})
 
-	log("hello")
-
-	//return nil, err
-
-	if err != nil {
-		return nil, errors.Wrap(err, "configure SPI")
-	} else {
-		log("setup SPI")
-	}
-
-	CSn := cfg.Csn
-
-	CSn.Set(true)
-	CSn.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	CSn.Set(true)
+	cfg.Csn.Set(true)
+	cfg.Csn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	cfg.Csn.Set(true)
 
 	board, err := NewBoard(
 		spi,
+		cfg.SpiCfg,
 		spiLock,
 		rst,
-		CSn,
+		cfg.Csn,
 		cfg.Intr,
 		log,
 	)

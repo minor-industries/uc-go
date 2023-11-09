@@ -12,6 +12,7 @@ import (
 type Board struct {
 	spi     *machine.SPI
 	spiLock *sync.Mutex
+	spiCfg  *machine.SPIConfig
 
 	rst  machine.Pin
 	csn  machine.Pin
@@ -27,6 +28,7 @@ type Board struct {
 
 func NewBoard(
 	spi *machine.SPI,
+	spiCfg *machine.SPIConfig,
 	spiLock *sync.Mutex,
 	rst machine.Pin,
 	csn machine.Pin,
@@ -35,6 +37,7 @@ func NewBoard(
 ) (*Board, error) {
 	b := &Board{
 		spi:         spi,
+		spiCfg:      spiCfg,
 		spiLock:     spiLock,
 		rst:         rst,
 		csn:         csn,
@@ -65,8 +68,14 @@ func NewBoard(
 func (b *Board) TxSPI(w, r []byte) error {
 	b.spiLock.Lock()
 	defer b.spiLock.Unlock()
+
+	err := b.spi.Configure(*b.spiCfg)
+	if err != nil {
+		return errors.Wrap(err, "configure spi")
+	}
+
 	b.csn.Low()
-	err := b.spi.Tx(w, r)
+	err = b.spi.Tx(w, r)
 	b.csn.High()
 	return err
 }

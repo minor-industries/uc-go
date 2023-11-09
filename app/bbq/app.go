@@ -1,6 +1,8 @@
 package bbq
 
 import (
+	"fmt"
+	"github.com/minor-industries/max31856"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
@@ -13,14 +15,31 @@ import (
 
 const dstAddr = 2
 
+type tcBoard struct {
+	spiLock *sync.Mutex
+	spi     *machine.SPI
+	csn     machine.Pin
+}
+
+func (t *tcBoard) TxSPI(w, r []byte) error {
+	t.spiLock.Lock()
+	defer t.spiLock.Unlock()
+
+	t.spi.Configure(machine.SPIConfig{
+		Mode: 1,
+		SCK:  machine.GPIO2,
+		SDO:  machine.GPIO3,
+		SDI:  machine.GPIO4,
+	})
+
+	t.csn.Low()
+	err := t.spi.Tx(w, r)
+	t.csn.High()
+
+	return err
+}
+
 func Run(logs *rpc.Queue) error {
-	env, err := rfm69_board.LoadConfig(logs)
-	if err != nil {
-		return errors.Wrap(err, "load config")
-	}
-
-	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
 	stopLeds := make(chan struct{})
 	go ledControl(stopLeds)
 	go func() {
@@ -28,12 +47,27 @@ func Run(logs *rpc.Queue) error {
 		close(stopLeds)
 	}()
 
+	env, err := rfm69_board.LoadConfig(logs)
+	if err != nil {
+		return errors.Wrap(err, "load config")
+	}
+
+	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	envSnapshot := env.SnapShot()
+	spiLock := new(sync.Mutex)
+
 	log := func(s string) {
 		logs.Log(s)
 	}
 
-	envSnapshot := env.SnapShot()
-	spiLock := new(sync.Mutex)
+	cfg.Tc.Csn.Set(true)
+	cfg.Tc.Csn.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	tc := max31856.NewMAX31856(&tcBoard{
+		spi:     cfg.Tc.Spi,
+		spiLock: spiLock,
+		csn:     cfg.Tc.Csn,
+	}, log)
 
 	radio, err := rfm69_board.SetupRfm69(
 		&envSnapshot,
@@ -42,13 +76,20 @@ func Run(logs *rpc.Queue) error {
 		log,
 	)
 	if err != nil {
-		return errors.Wrap(err, "rfm69")
+		logs.Error(err)
+		//return errors.Wrap(err, "rfm69")
 	}
+
+	<-time.After(time.Second)
+
+	tc.Init()
+	logs.Log("tc init complete")
 
 	err = mainLoop(
 		logs,
 		radio,
 		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
+		tc,
 	)
 	if err != nil {
 		return errors.Wrap(err, "mainloop")
@@ -76,6 +117,7 @@ func mainLoop(
 	logs *rpc.Queue,
 	radio *rfm69.Radio,
 	randSource *rand.Rand,
+	tc *max31856.MAX31856,
 ) error {
 	readAndSend := func() error {
 		return errors.New("read and send not implemented")
@@ -83,7 +125,8 @@ func mainLoop(
 
 	for {
 		if err := readAndSend(); err != nil {
-			logs.Error(err)
+			t := tc.Temperature()
+			logs.Log(fmt.Sprintf("temp = %f", t))
 		}
 
 		sleep := time.Duration(4000+randSource.Intn(2000)) * time.Millisecond
