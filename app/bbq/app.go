@@ -16,8 +16,9 @@ import (
 const dstAddr = 2
 
 type tcBoard struct {
-	spiLock *sync.Mutex
 	spi     *machine.SPI
+	spiCfg  *machine.SPIConfig
+	spiLock *sync.Mutex
 	csn     machine.Pin
 }
 
@@ -25,12 +26,9 @@ func (t *tcBoard) TxSPI(w, r []byte) error {
 	t.spiLock.Lock()
 	defer t.spiLock.Unlock()
 
-	t.spi.Configure(machine.SPIConfig{
-		Mode: 1,
-		SCK:  machine.GPIO2,
-		SDO:  machine.GPIO3,
-		SDI:  machine.GPIO4,
-	})
+	if err := t.spi.Configure(*t.spiCfg); err != nil {
+		return errors.Wrap(err, "configure spi")
+	}
 
 	t.csn.Low()
 	err := t.spi.Tx(w, r)
@@ -43,7 +41,7 @@ func Run(logs *rpc.Queue) error {
 	stopLeds := make(chan struct{})
 	go ledControl(stopLeds)
 	go func() {
-		<-time.After(5 * time.Second)
+		<-time.After(5 * time.Minute)
 		close(stopLeds)
 	}()
 
@@ -66,7 +64,13 @@ func Run(logs *rpc.Queue) error {
 	tc := max31856.NewMAX31856(&tcBoard{
 		spi:     cfg.Tc.Spi,
 		spiLock: spiLock,
-		csn:     cfg.Tc.Csn,
+		spiCfg: &machine.SPIConfig{
+			Mode: 1,
+			SCK:  machine.GPIO2,
+			SDO:  machine.GPIO3,
+			SDI:  machine.GPIO4,
+		},
+		csn: cfg.Tc.Csn,
 	}, log)
 
 	radio, err := rfm69_board.SetupRfm69(
@@ -82,7 +86,9 @@ func Run(logs *rpc.Queue) error {
 
 	<-time.After(time.Second)
 
-	tc.Init()
+	if err := tc.Init(); err != nil {
+		logs.Error(err)
+	}
 	logs.Log("tc init complete")
 
 	err = mainLoop(
