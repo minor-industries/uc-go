@@ -11,6 +11,7 @@ import (
 	"time"
 	"uc-go/pkg/protocol/rpc"
 	rfm69_board "uc-go/pkg/rfm69-board"
+	"uc-go/pkg/schema"
 	"uc-go/pkg/spi"
 )
 
@@ -116,6 +117,16 @@ func mainLoop(
 			tc := tcs[name]
 			t := tc.Temperature()
 			logs.Log(fmt.Sprintf("tc [%s] temp = %.02f", name, t))
+
+			desc := [16]byte{}
+			copy(desc[:], name)
+
+			if err := rfm69_board.SendMsg(radio, dstAddr, 2, &schema.ThermocoupleData{
+				Temperature: float32(t),
+				Description: desc,
+			}); err != nil {
+				return errors.Wrap(err, "send msg")
+			}
 		}
 		return nil
 	}

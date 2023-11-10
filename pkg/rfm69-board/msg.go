@@ -5,14 +5,13 @@ import (
 	"encoding/binary"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
-	"uc-go/pkg/schema"
 )
 
 func SendMsg(
 	radio *rfm69.Radio,
 	dstAddr byte,
 	msgType byte,
-	body *schema.SensorData,
+	body interface{},
 ) error {
 	bodyBuf := bytes.NewBuffer(nil)
 	bodyBuf.WriteByte(msgType) // message ID
