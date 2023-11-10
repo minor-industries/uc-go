@@ -50,7 +50,7 @@ func Run(logs *rpc.Queue) error {
 			log,
 		),
 		cfg.Tc1.Name: max31856.NewMAX31856(
-			spi.NewSPI(cfg.Tc0.Spi, spiLock),
+			spi.NewSPI(cfg.Tc1.Spi, spiLock),
 			log,
 		),
 	}
