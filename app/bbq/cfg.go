@@ -6,6 +6,11 @@ import (
 	"uc-go/pkg/spi"
 )
 
+type ThermocoupleCfg struct {
+	Name string
+	Spi  *spi.Config
+}
+
 type BoardCfg struct {
 	// i2c
 	Rfm rfm69_board.PinCfg
@@ -13,7 +18,8 @@ type BoardCfg struct {
 	// misc
 	led machine.Pin
 
-	Tc *spi.Config
+	Tc0 *ThermocoupleCfg
+	Tc1 *ThermocoupleCfg
 }
 
 var cfg = BoardCfg{
@@ -28,19 +34,36 @@ var cfg = BoardCfg{
 
 		Rst:  machine.GPIO6,
 		Intr: machine.GPIO7,
-		Csn:  machine.GPIO9,
+		Csn:  machine.GPIO5,
 	},
 
 	led: machine.LED,
 
-	Tc: &spi.Config{
-		Spi: machine.SPI0,
-		Config: &machine.SPIConfig{
-			Mode: 1,
-			SCK:  machine.GPIO2,
-			SDO:  machine.GPIO3,
-			SDI:  machine.GPIO4,
+	Tc0: &ThermocoupleCfg{
+		Name: "bbq01-meat",
+		Spi: &spi.Config{
+			Spi: machine.SPI0,
+			Config: &machine.SPIConfig{
+				Mode: 1,
+				SCK:  machine.GPIO2,
+				SDO:  machine.GPIO3,
+				SDI:  machine.GPIO4,
+			},
+			Cs: machine.GPIO8,
 		},
-		Cs: machine.GPIO8,
+	},
+
+	Tc1: &ThermocoupleCfg{
+		Name: "bbq01-bbq",
+		Spi: &spi.Config{
+			Spi: machine.SPI0,
+			Config: &machine.SPIConfig{
+				Mode: 1,
+				SCK:  machine.GPIO2,
+				SDO:  machine.GPIO3,
+				SDI:  machine.GPIO4,
+			},
+			Cs: machine.GPIO9,
+		},
 	},
 }

@@ -38,9 +38,31 @@ func Run(logs *rpc.Queue) error {
 		logs.Log(s)
 	}
 
-	boardSpi := spi.NewSPI(cfg.Tc, spiLock)
+	tcNames := []string{
+		cfg.Tc0.Name,
+		cfg.Tc1.Name,
+	}
 
-	tc := max31856.NewMAX31856(boardSpi, log)
+	tcs := map[string]*max31856.MAX31856{
+		cfg.Tc0.Name: max31856.NewMAX31856(
+			spi.NewSPI(cfg.Tc0.Spi, spiLock),
+			log,
+		),
+		cfg.Tc1.Name: max31856.NewMAX31856(
+			spi.NewSPI(cfg.Tc0.Spi, spiLock),
+			log,
+		),
+	}
+
+	for _, name := range tcNames {
+		tc := tcs[name]
+		err := tc.Init()
+		if err != nil {
+			logs.Error(errors.Wrap(err, fmt.Sprintf("tc [%s] init error", name)))
+		} else {
+			logs.Log(fmt.Sprintf("tc [%s] init"))
+		}
+	}
 
 	radio, err := rfm69_board.SetupRfm69(
 		&envSnapshot,
@@ -53,18 +75,12 @@ func Run(logs *rpc.Queue) error {
 		//return errors.Wrap(err, "rfm69")
 	}
 
-	<-time.After(time.Second)
-
-	if err := tc.Init(); err != nil {
-		logs.Error(err)
-	}
-	logs.Log("tc init complete")
-
 	err = mainLoop(
 		logs,
 		radio,
 		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
-		tc,
+		tcNames,
+		tcs,
 	)
 	if err != nil {
 		return errors.Wrap(err, "mainloop")
@@ -92,16 +108,21 @@ func mainLoop(
 	logs *rpc.Queue,
 	radio *rfm69.Radio,
 	randSource *rand.Rand,
-	tc *max31856.MAX31856,
+	tcNames []string,
+	tcs map[string]*max31856.MAX31856,
 ) error {
 	readAndSend := func() error {
-		return errors.New("read and send not implemented")
+		for _, name := range tcNames {
+			tc := tcs[name]
+			t := tc.Temperature()
+			logs.Log(fmt.Sprintf("tc [%s] temp = %.02f", name, t))
+		}
+		return nil
 	}
 
 	for {
 		if err := readAndSend(); err != nil {
-			t := tc.Temperature()
-			logs.Log(fmt.Sprintf("temp = %f", t))
+			logs.Error(errors.Wrap(err, "read and send"))
 		}
 
 		sleep := time.Duration(4000+randSource.Intn(2000)) * time.Millisecond
