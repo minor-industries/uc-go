@@ -9,7 +9,7 @@ import (
 	"machine"
 	"os"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/logger"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 	filesystem  = littlefs.New(blockDevice)
 )
 
-func Setup(storedLogs *rpc.Queue) (*littlefs.LFS, error) {
+func Setup(storedLogs logger.Logger) (*littlefs.LFS, error) {
 	lfs := filesystem.Configure(&littlefs.Config{
 		CacheSize:     512,
 		LookaheadSize: 512,
@@ -63,7 +63,7 @@ func Setup(storedLogs *rpc.Queue) (*littlefs.LFS, error) {
 	return lfs, nil
 }
 
-func mount(logs *rpc.Queue, lfs *littlefs.LFS) (err error) {
+func mount(logs logger.Logger, lfs *littlefs.LFS) (err error) {
 	for i := 0; i <= 1; i++ {
 		err = lfs.Mount()
 		if err != nil {
@@ -115,7 +115,7 @@ func WriteFile(
 }
 
 func WriteMsgp(
-	logs *rpc.Queue,
+	logs logger.Logger,
 	lfs *littlefs.LFS,
 	msg msgp.Marshaler,
 	filename string,

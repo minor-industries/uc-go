@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/logger"
 )
 
 type Serializer interface {
@@ -14,7 +14,7 @@ type Serializer interface {
 
 func LoadConfig[T Serializer](
 	lfs *littlefs.LFS,
-	logs *rpc.Queue,
+	logs logger.Logger,
 	filename string,
 	initConfig T,
 ) (T, error) {

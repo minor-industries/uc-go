@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"sync"
 	"time"
-	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/logger"
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/schema"
 	"uc-go/pkg/spi"
@@ -17,7 +17,7 @@ import (
 
 const dstAddr = 2
 
-func Run(logs *rpc.Queue) error {
+func Run(logs logger.Logger) error {
 	stopLeds := make(chan struct{})
 	go ledControl(stopLeds)
 	go func() {
@@ -106,7 +106,7 @@ func ledControl(done <-chan struct{}) {
 }
 
 func mainLoop(
-	logs *rpc.Queue,
+	logs logger.Logger,
 	radio *rfm69.Radio,
 	randSource *rand.Rand,
 	tcNames []string,

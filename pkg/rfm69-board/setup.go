@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"machine"
 	"sync"
-	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/logger"
 	"uc-go/pkg/rfm69-board/cfg"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
@@ -66,7 +66,7 @@ const (
 	initialNodeAddr = 0xee
 )
 
-func LoadConfig(logs *rpc.Queue) (
+func LoadConfig(logs logger.Logger) (
 	*util.SyncConfig[cfg.Config],
 	error,
 ) {
