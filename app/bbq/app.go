@@ -25,6 +25,9 @@ func Run(logs logger.Logger) error {
 		close(stopLeds)
 	}()
 
+	time.Sleep(2 * time.Second)
+	fmt.Println("starting")
+
 	env, err := rfm69_board.LoadConfig(logs)
 	if err != nil {
 		return errors.Wrap(err, "load config")
