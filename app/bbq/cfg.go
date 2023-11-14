@@ -2,7 +2,6 @@ package bbq
 
 import (
 	"machine"
-	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/spi"
 )
 
@@ -13,11 +12,10 @@ type ThermocoupleCfg struct {
 
 type BoardCfg struct {
 	// i2c
-	Rfm rfm69_board.PinCfg
+	//Rfm rfm69_board.PinCfg
 
 	// misc
 	led machine.Pin
 
-	Tc0 *ThermocoupleCfg
-	Tc1 *ThermocoupleCfg
+	Tcs []*ThermocoupleCfg
 }

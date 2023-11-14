@@ -36,26 +36,22 @@ func Run(logs logger.Logger) error {
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
 	envSnapshot := env.SnapShot()
+	_ = envSnapshot // TODO
 	spiLock := new(sync.Mutex)
 
 	log := func(s string) {
 		logs.Log(s)
 	}
 
-	tcNames := []string{
-		cfg.Tc0.Name,
-		cfg.Tc1.Name,
-	}
+	tcNames := make([]string, len(cfg.Tcs))
+	tcs := map[string]*max31856.MAX31856{}
 
-	tcs := map[string]*max31856.MAX31856{
-		cfg.Tc0.Name: max31856.NewMAX31856(
-			spi.NewSPI(cfg.Tc0.Spi, spiLock),
+	for i, tc := range cfg.Tcs {
+		tcNames[i] = tc.Name
+		tcs[tc.Name] = max31856.NewMAX31856(
+			spi.NewSPI(tc.Spi, spiLock),
 			log,
-		),
-		cfg.Tc1.Name: max31856.NewMAX31856(
-			spi.NewSPI(cfg.Tc1.Spi, spiLock),
-			log,
-		),
+		)
 	}
 
 	for _, name := range tcNames {
@@ -64,31 +60,40 @@ func Run(logs logger.Logger) error {
 		if err != nil {
 			logs.Error(errors.Wrap(err, fmt.Sprintf("tc [%s] init error", name)))
 		} else {
-			logs.Log(fmt.Sprintf("tc [%s] init"))
+			logs.Log(fmt.Sprintf("tc [%s] init", name))
 		}
 	}
 
-	radio, err := rfm69_board.SetupRfm69(
-		&envSnapshot,
-		&cfg.Rfm,
-		spiLock,
-		log,
-	)
-	if err != nil {
-		logs.Error(err)
-		//return errors.Wrap(err, "rfm69")
+	for {
+		for _, name := range tcNames {
+			tc := tcs[name]
+			t := tc.Temperature()
+			logs.Log(fmt.Sprintf("%s: tc [%s] temp = %.02f", time.Now().String(), name, t))
+		}
+		time.Sleep(time.Second)
 	}
 
-	err = mainLoop(
-		logs,
-		radio,
-		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
-		tcNames,
-		tcs,
-	)
-	if err != nil {
-		return errors.Wrap(err, "mainloop")
-	}
+	//radio, err := rfm69_board.SetupRfm69(
+	//	&envSnapshot,
+	//	&cfg.Rfm,
+	//	spiLock,
+	//	log,
+	//)
+	//if err != nil {
+	//	logs.Error(err)
+	//	//return errors.Wrap(err, "rfm69")
+	//}
+	//
+	//err = mainLoop(
+	//	logs,
+	//	radio,
+	//	rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
+	//	tcNames,
+	//	tcs,
+	//)
+	//if err != nil {
+	//	return errors.Wrap(err, "mainloop")
+	//}
 
 	return errors.New("run exited")
 }

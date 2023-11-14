@@ -6,7 +6,6 @@ package bbq
 import (
 	"machine"
 	rfm69_board "uc-go/pkg/rfm69-board"
-	"uc-go/pkg/spi"
 )
 
 var cfg = BoardCfg{
@@ -26,31 +25,32 @@ var cfg = BoardCfg{
 
 	led: machine.LED,
 
-	Tc0: &ThermocoupleCfg{
-		Name: "bbq01-meat",
-		Spi: &spi.Config{
-			Spi: machine.SPI0,
-			Config: &machine.SPIConfig{
-				Mode: 1,
-				SCK:  machine.GPIO2,
-				SDO:  machine.GPIO3,
-				SDI:  machine.GPIO4,
-			},
-			Cs: machine.GPIO8,
-		},
-	},
-
-	Tc1: &ThermocoupleCfg{
-		Name: "bbq01-bbq",
-		Spi: &spi.Config{
-			Spi: machine.SPI0,
-			Config: &machine.SPIConfig{
-				Mode: 1,
-				SCK:  machine.GPIO2,
-				SDO:  machine.GPIO3,
-				SDI:  machine.GPIO4,
-			},
-			Cs: machine.GPIO9,
-		},
+	Tcs: []*ThermocoupleCfg{
+		//{
+		//	Name: "bbq01-meat",
+		//	Spi: &spi.Config{
+		//		Spi: machine.SPI0,
+		//		Config: &machine.SPIConfig{
+		//			Mode: 1,
+		//			SCK:  machine.GPIO2,
+		//			SDO:  machine.GPIO3,
+		//			SDI:  machine.GPIO4,
+		//		},
+		//		Cs: machine.GPIO8,
+		//	},
+		//},
+		//{
+		//	Name: "bbq01-bbq",
+		//	Spi: &spi.Config{
+		//		Spi: machine.SPI0,
+		//		Config: &machine.SPIConfig{
+		//			Mode: 1,
+		//			SCK:  machine.GPIO2,
+		//			SDO:  machine.GPIO3,
+		//			SDI:  machine.GPIO4,
+		//		},
+		//		Cs: machine.GPIO9,
+		//	},
+		//},
 	},
 }

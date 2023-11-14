@@ -32,7 +32,7 @@ func pollUsbSerial() string {
 	}
 }
 
-func main() {
+func run() error {
 	dev := pollUsbSerial()
 
 	device, err := serial.OpenPort(&serial.Config{
@@ -45,11 +45,15 @@ func main() {
 	})
 	noErr(err)
 
-	go func() {
-		io.Copy(os.Stdout, device)
-	}()
+	_, err = io.Copy(os.Stdout, device)
+	return err
+}
 
-	select {}
+func main() {
+	for {
+		err := run()
+		fmt.Println("error:", err)
+	}
 }
 
 func noErr(err error) {
