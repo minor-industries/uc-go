@@ -68,7 +68,7 @@ func Run(logs logger.Logger) error {
 		for _, name := range tcNames {
 			tc := tcs[name]
 			t := tc.Temperature()
-			logs.Log(fmt.Sprintf("%s: tc [%s] temp = %.02f", time.Now().String(), name, t))
+			logs.Log(fmt.Sprintf("ABC %s: tc [%s] temp = %.02f", time.Now().String(), name, t))
 		}
 		<-time.After(time.Second)
 	}
