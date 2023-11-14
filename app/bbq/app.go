@@ -67,10 +67,19 @@ func Run(logs logger.Logger) error {
 		}
 	}
 
+	bl.Seq([]int{4, 4})
+
+	once := sync.Once{}
+
 	for {
 		for _, name := range tcNames {
 			tc := tcs[name]
 			t := tc.Temperature()
+			if t != 0 {
+				once.Do(func() {
+					bl.Seq([]int{32 - 12, 4, 4, 4})
+				})
+			}
 			logs.Log(fmt.Sprintf("ABC %s: tc [%s] temp = %.02f", time.Now().String(), name, t))
 		}
 		<-time.After(time.Second)
