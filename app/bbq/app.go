@@ -70,7 +70,7 @@ func Run(logs logger.Logger) error {
 			t := tc.Temperature()
 			logs.Log(fmt.Sprintf("%s: tc [%s] temp = %.02f", time.Now().String(), name, t))
 		}
-		time.Sleep(time.Second)
+		<-time.After(time.Second)
 	}
 
 	//radio, err := rfm69_board.SetupRfm69(

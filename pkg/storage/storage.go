@@ -24,9 +24,6 @@ func Setup(storedLogs logger.Logger) (*littlefs.LFS, error) {
 		BlockCycles:   100,
 	})
 
-	led := machine.LED
-	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
 	storedLogs.Log(fmt.Sprintf(
 		"lsblk start=0x%x, end=0x%x",
 		machine.FlashDataStart(),

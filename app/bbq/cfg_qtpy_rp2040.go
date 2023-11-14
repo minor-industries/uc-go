@@ -1,5 +1,4 @@
-//go:build pico
-// +build pico
+//go:build qtpy_rp2040
 
 package bbq
 
@@ -10,20 +9,20 @@ import (
 
 var cfg = BoardCfg{
 	//Rfm: rfm69_board.PinCfg{
-	//	Spi: machine.SPI0,
+	//	Spi: &machine.SPI0,
 	//	SpiCfg: &machine.SPIConfig{
 	//		Mode: 0,
-	//		SCK:  machine.GPIO2,
-	//		SDO:  machine.GPIO3,
-	//		SDI:  machine.GPIO4,
+	//		SCK:  machine.A3,
+	//		SDO:  machine.A4,
+	//		SDI:  machine.A1,
 	//	},
 	//
-	//	Rst:  machine.GPIO6,
-	//	Intr: machine.GPIO7,
-	//	Csn:  machine.GPIO5,
+	//	Rst:  machine.A0,
+	//	Intr: machine.NoPin,
+	//	Csn:  machine.A2,
 	//},
 
-	led: machine.LED,
+	led: machine.A1,
 
 	Tcs: []*ThermocoupleCfg{
 		{
@@ -32,24 +31,24 @@ var cfg = BoardCfg{
 				Spi: machine.SPI0,
 				Config: &machine.SPIConfig{
 					Mode: 1,
-					SCK:  machine.GPIO2,
-					SDO:  machine.GPIO3,
-					SDI:  machine.GPIO4,
+					SCK:  machine.SPI0_SCK_PIN,
+					SDO:  machine.SPI0_SDO_PIN,
+					SDI:  machine.SPI0_SDI_PIN,
 				},
-				Cs: machine.GPIO5,
+				Cs: machine.A0,
 			},
 		},
 		//{
 		//	Name: "bbq01-bbq",
 		//	Spi: &spi.Config{
-		//		Spi: machine.SPI0,
+		//		Spi: &machine.SPI0,
 		//		Config: &machine.SPIConfig{
 		//			Mode: 1,
-		//			SCK:  machine.GPIO2,
-		//			SDO:  machine.GPIO3,
-		//			SDI:  machine.GPIO4,
+		//			SCK:  machine.A3,
+		//			SDO:  machine.A4,
+		//			SDI:  machine.A1,
 		//		},
-		//		Cs: machine.GPIO9,
+		//		Cs: machine.A0, // TODO:
 		//	},
 		//},
 	},
