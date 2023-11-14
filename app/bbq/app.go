@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+	"uc-go/pkg/blikenlights"
 	"uc-go/pkg/logger"
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/schema"
@@ -18,12 +19,14 @@ import (
 const dstAddr = 2
 
 func Run(logs logger.Logger) error {
-	stopLeds := make(chan struct{})
-	go ledControl(stopLeds)
-	go func() {
-		<-time.After(5 * time.Minute)
-		close(stopLeds)
-	}()
+	bl := blikenlights.NewLight(cfg.led)
+	go bl.Run()
+	bl.Seq([]int{2, 2})
+
+	//go func() {
+	//	<-time.After(5 * time.Minute)
+	//	close(stopLeds)
+	//}()
 
 	time.Sleep(2 * time.Second)
 	fmt.Println("starting")
@@ -96,21 +99,6 @@ func Run(logs logger.Logger) error {
 	//}
 
 	return errors.New("run exited")
-}
-
-func ledControl(done <-chan struct{}) {
-	ticker := time.NewTicker(100 * time.Millisecond)
-	val := true
-
-	for {
-		select {
-		case <-ticker.C:
-			cfg.led.Set(val)
-			val = !val
-		case <-done:
-			return
-		}
-	}
 }
 
 func mainLoop(
