@@ -6,7 +6,6 @@ import (
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
-	"math/rand"
 	"sync"
 	"time"
 	"uc-go/pkg/blikenlights"
@@ -101,7 +100,6 @@ func Run(logs logger.Logger) error {
 	err = mainLoop(
 		logs,
 		radio,
-		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
 		tcNames,
 		tcs,
 	)
@@ -115,10 +113,10 @@ func Run(logs logger.Logger) error {
 func mainLoop(
 	logs logger.Logger,
 	radio *rfm69.Radio,
-	randSource *rand.Rand,
 	tcNames []string,
 	tcs map[string]*max31856.MAX31856,
 ) error {
+
 	readAndSend := func() error {
 		for _, name := range tcNames {
 			tc := tcs[name]
@@ -143,7 +141,8 @@ func mainLoop(
 			logs.Error(errors.Wrap(err, "read and send"))
 		}
 
-		sleep := time.Duration(4000+randSource.Intn(2000)) * time.Millisecond
+		// TODO: need random sleep here (with low memory usage)
+		sleep := 5000 * time.Millisecond
 		time.Sleep(sleep)
 	}
 }
