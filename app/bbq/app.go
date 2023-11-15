@@ -40,7 +40,11 @@ func Run(logs logger.Logger) error {
 
 	envSnapshot := env.SnapShot()
 	_ = envSnapshot // TODO
+
 	spiLock := new(sync.Mutex)
+
+	// need to build all SPIs before using them to set CS lines
+	rfmSpi := spi.NewSPI(cfg.Rfm.Spi, spiLock)
 
 	log := func(s string) {
 		logs.Log(s)
@@ -67,11 +71,10 @@ func Run(logs logger.Logger) error {
 		}
 	}
 
-	bl.Seq([]int{4, 4})
+	{
+		bl.Seq([]int{4, 4})
+		once := sync.Once{}
 
-	once := sync.Once{}
-
-	for {
 		for _, name := range tcNames {
 			tc := tcs[name]
 			t := tc.Temperature()
@@ -82,30 +85,29 @@ func Run(logs logger.Logger) error {
 			}
 			logs.Log(fmt.Sprintf("ABC %s: tc [%s] temp = %.02f", time.Now().String(), name, t))
 		}
-		<-time.After(time.Second)
 	}
 
-	//radio, err := rfm69_board.SetupRfm69(
-	//	&envSnapshot,
-	//	&cfg.Rfm,
-	//	spiLock,
-	//	log,
-	//)
-	//if err != nil {
-	//	logs.Error(err)
-	//	//return errors.Wrap(err, "rfm69")
-	//}
-	//
-	//err = mainLoop(
-	//	logs,
-	//	radio,
-	//	rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
-	//	tcNames,
-	//	tcs,
-	//)
-	//if err != nil {
-	//	return errors.Wrap(err, "mainloop")
-	//}
+	radio, err := rfm69_board.SetupRfm69(
+		&envSnapshot,
+		&cfg.Rfm,
+		rfmSpi,
+		log,
+	)
+	if err != nil {
+		logs.Error(err)
+		//return errors.Wrap(err, "rfm69")
+	}
+
+	err = mainLoop(
+		logs,
+		radio,
+		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
+		tcNames,
+		tcs,
+	)
+	if err != nil {
+		return errors.Wrap(err, "mainloop")
+	}
 
 	return errors.New("run exited")
 }

@@ -4,45 +4,33 @@ import (
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
-	"sync"
 	"uc-go/pkg/logger"
 	"uc-go/pkg/rfm69-board/cfg"
+	"uc-go/pkg/spi"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
 )
 
 type PinCfg struct {
 	// rfm
-	Spi    *machine.SPI
-	SpiCfg *machine.SPIConfig
+	Spi *spi.Config
 
 	Rst  machine.Pin
 	Intr machine.Pin
-
-	Csn machine.Pin
 }
 
 func SetupRfm69(
 	env *cfg.Config,
 	cfg *PinCfg,
-	spiLock *sync.Mutex,
+	spi *spi.SPI,
 	log func(s string),
 ) (*rfm69.Radio, error) {
 	rst := cfg.Rst
 	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
-	spi := cfg.Spi
-
-	cfg.Csn.Set(true)
-	cfg.Csn.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	cfg.Csn.Set(true)
-
 	board, err := NewBoard(
 		spi,
-		cfg.SpiCfg,
-		spiLock,
 		rst,
-		cfg.Csn,
 		cfg.Intr,
 		log,
 	)

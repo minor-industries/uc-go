@@ -4,18 +4,14 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"machine"
-	"sync"
 	"sync/atomic"
 	"time"
+	"uc-go/pkg/spi"
 )
 
 type Board struct {
-	spi     *machine.SPI
-	spiLock *sync.Mutex
-	spiCfg  *machine.SPIConfig
-
+	spi  *spi.SPI
 	rst  machine.Pin
-	csn  machine.Pin
 	intr machine.Pin
 
 	interruptCount uint32
@@ -27,20 +23,14 @@ type Board struct {
 }
 
 func NewBoard(
-	spi *machine.SPI,
-	spiCfg *machine.SPIConfig,
-	spiLock *sync.Mutex,
+	spi *spi.SPI,
 	rst machine.Pin,
-	csn machine.Pin,
 	intr machine.Pin,
 	log func(s string),
 ) (*Board, error) {
 	b := &Board{
 		spi:         spi,
-		spiCfg:      spiCfg,
-		spiLock:     spiLock,
 		rst:         rst,
-		csn:         csn,
 		intr:        intr,
 		interruptCh: make(chan struct{}),
 		log:         log,
@@ -66,18 +56,7 @@ func NewBoard(
 }
 
 func (b *Board) TxSPI(w, r []byte) error {
-	b.spiLock.Lock()
-	defer b.spiLock.Unlock()
-
-	err := b.spi.Configure(*b.spiCfg)
-	if err != nil {
-		return errors.Wrap(err, "configure spi")
-	}
-
-	b.csn.Low()
-	err = b.spi.Tx(w, r)
-	b.csn.High()
-	return err
+	return b.spi.TxSPI(w, r)
 }
 
 func (b *Board) Reset(b2 bool) error {
