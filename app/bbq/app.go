@@ -10,6 +10,7 @@ import (
 	"time"
 	"uc-go/pkg/blikenlights"
 	"uc-go/pkg/logger"
+	"uc-go/pkg/max31855"
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/schema"
 	"uc-go/pkg/spi"
@@ -86,6 +87,19 @@ func Run(logs logger.Logger) error {
 		}
 	}
 
+	spiX := spi.NewSPI(&spi.Config{
+		Spi: &machine.SPI0,
+		Config: &machine.SPIConfig{
+			SCK:  machine.SPI0_SCK_PIN,
+			SDO:  machine.SPI0_SDO_PIN,
+			SDI:  machine.SPI0_SDI_PIN,
+			Mode: 0,
+		},
+		Cs: machine.A2,
+	}, spiLock)
+
+	tc2 := max31855.NewThermocouple(spiX, log)
+
 	radio, err := rfm69_board.SetupRfm69(
 		&envSnapshot,
 		&cfg.Rfm,
@@ -102,6 +116,7 @@ func Run(logs logger.Logger) error {
 		radio,
 		tcNames,
 		tcs,
+		tc2,
 	)
 	if err != nil {
 		return errors.Wrap(err, "mainloop")
@@ -115,6 +130,7 @@ func mainLoop(
 	radio *rfm69.Radio,
 	tcNames []string,
 	tcs map[string]*max31856.MAX31856,
+	tc2 *max31855.Thermocouple,
 ) error {
 
 	readAndSend := func() error {
@@ -122,6 +138,8 @@ func mainLoop(
 			tc := tcs[name]
 			t := tc.Temperature()
 			logs.Log(fmt.Sprintf("tc [%s] temp = %.02f", name, t))
+
+			tc2.Temperature()
 
 			if radio == nil {
 				return errors.New("no radio")
