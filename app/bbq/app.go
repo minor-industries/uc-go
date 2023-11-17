@@ -123,6 +123,10 @@ func mainLoop(
 			t := tc.Temperature()
 			logs.Log(fmt.Sprintf("tc [%s] temp = %.02f", name, t))
 
+			if radio == nil {
+				return errors.New("no radio")
+			}
+
 			desc := [16]byte{}
 			copy(desc[:], name)
 
