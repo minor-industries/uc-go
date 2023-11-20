@@ -93,7 +93,7 @@ func Run(logs logger.Logger) error {
 			SCK:  machine.SPI0_SCK_PIN,
 			SDO:  machine.SPI0_SDO_PIN,
 			SDI:  machine.SPI0_SDI_PIN,
-			Mode: 0,
+			Mode: 1,
 		},
 		Cs: machine.A2,
 	}, spiLock)

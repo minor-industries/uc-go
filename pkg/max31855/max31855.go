@@ -2,6 +2,7 @@ package max31855
 
 import (
 	"encoding/hex"
+	"fmt"
 	"github.com/pkg/errors"
 	"uc-go/pkg/spi"
 )
@@ -33,6 +34,11 @@ func (tc *Thermocouple) Temperature() (float64, error) {
 	}
 
 	tc.log("rx: " + hex.Dump(rx[:]))
+
+	for _, b := range rx {
+		fmt.Printf("%08b ", b)
+	}
+	fmt.Println("")
 
 	return -1, errors.New("not implemented")
 }
