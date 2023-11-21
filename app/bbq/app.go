@@ -1,6 +1,7 @@
 package bbq
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/minor-industries/max31856"
 	"github.com/minor-industries/rfm69"
@@ -84,6 +85,24 @@ func Run(logs logger.Logger) error {
 				})
 			}
 			logs.Log(fmt.Sprintf("ABC %s: tc [%s] temp = %.02f", time.Now().String(), name, t))
+		}
+	}
+
+	i2c := machine.I2C0
+	err = i2c.Configure(machine.I2CConfig{})
+	if err != nil {
+		logs.Error(errors.Wrap(err, "configure i2c"))
+	} else {
+		logs.Log("configured i2c")
+	}
+
+	{
+		var rx [2]byte
+		err := i2c.ReadRegister(0x60, 0x00, rx[:])
+		if err != nil {
+			logs.Error(errors.Wrap(err, "read register"))
+		} else {
+			logs.Log("read: " + hex.Dump(rx[:]))
 		}
 	}
 
