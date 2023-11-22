@@ -17,6 +17,4 @@ type BoardCfg struct {
 
 	// misc
 	led machine.Pin
-
-	Tcs []*ThermocoupleCfg
 }
