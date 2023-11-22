@@ -1,6 +1,7 @@
 package bbq
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"github.com/minor-industries/max31856"
@@ -96,15 +97,7 @@ func Run(logs logger.Logger) error {
 		logs.Log("configured i2c")
 	}
 
-	{
-		var rx [2]byte
-		err := i2c.ReadRegister(0x60, 0x00, rx[:])
-		if err != nil {
-			logs.Error(errors.Wrap(err, "read register"))
-		} else {
-			logs.Log("read: " + hex.Dump(rx[:]))
-		}
-	}
+	readMpc9600(logs, i2c)
 
 	spiX := spi.NewSPI(&spi.Config{
 		Spi: &machine.SPI0,
@@ -136,6 +129,7 @@ func Run(logs logger.Logger) error {
 		tcNames,
 		tcs,
 		tc2,
+		i2c,
 	)
 	if err != nil {
 		return errors.Wrap(err, "mainloop")
@@ -144,12 +138,31 @@ func Run(logs logger.Logger) error {
 	return errors.New("run exited")
 }
 
+func readMpc9600(
+	logs logger.Logger,
+	i2c *machine.I2C,
+) {
+	var rx [2]byte
+	err := i2c.ReadRegister(0x60, 0x00, rx[:])
+	if err != nil {
+		logs.Error(errors.Wrap(err, "read register"))
+	} else {
+		logs.Log("read: " + hex.Dump(rx[:]))
+		t := float32(binary.BigEndian.Uint16(rx[:])) * 0.0625
+		if rx[0]&0x80 != 0 {
+			t -= 4096
+		}
+		fmt.Println("mpc t", t)
+	}
+}
+
 func mainLoop(
 	logs logger.Logger,
 	radio *rfm69.Radio,
 	tcNames []string,
 	tcs map[string]*max31856.MAX31856,
 	tc2 *max31855.Thermocouple,
+	i2c *machine.I2C,
 ) error {
 
 	readAndSend := func() error {
@@ -159,6 +172,8 @@ func mainLoop(
 			logs.Log(fmt.Sprintf("tc [%s] temp = %.02f", name, t))
 
 			tc2.Temperature()
+
+			readMpc9600(logs, i2c)
 
 			if radio == nil {
 				return errors.New("no radio")
