@@ -32,6 +32,8 @@ func Run(logs logger.Logger) error {
 		close(stopLeds)
 	}()
 
+	<-time.After(2 * time.Second)
+
 	i2c := cfg.i2c
 
 	err = i2c.Configure(*cfg.i2cCfg)
