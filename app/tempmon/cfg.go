@@ -9,10 +9,9 @@ type BoardCfg struct {
 	// i2c
 	Rfm rfm69_board.PinCfg
 
-	i2c *machine.I2C
-	sda machine.Pin
-	scl machine.Pin
-
 	// misc
 	led machine.Pin
+
+	i2cCfg *machine.I2CConfig
+	i2c    *machine.I2C
 }

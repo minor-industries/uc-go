@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"uc-go/app/bbq"
+	"uc-go/app/tempmon"
 )
 
 type logger struct{}
@@ -23,6 +23,6 @@ func (l *logger) Rpc(s string, i interface{}) error {
 
 func main() {
 	logs := &logger{}
-	err := bbq.Run(logs)
+	err := tempmon.Run(logs)
 	logs.Error(errors.Wrap(err, "bbq exited"))
 }

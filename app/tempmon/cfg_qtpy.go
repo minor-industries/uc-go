@@ -1,15 +1,14 @@
 //go:build qtpy
 
-package bbq
+package tempmon
 
 import (
 	"machine"
-	"uc-go/app/tempmon"
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/spi"
 )
 
-var cfg = tempmon.BoardCfg{
+var cfg = BoardCfg{
 	Rfm: rfm69_board.PinCfg{
 		Spi: &spi.Config{
 			Spi: &machine.SPI0,
@@ -24,6 +23,8 @@ var cfg = tempmon.BoardCfg{
 		Rst:  machine.NoPin,
 		Intr: machine.NoPin,
 	},
-
 	led: machine.NoPin,
+
+	i2cCfg: &machine.I2CConfig{},
+	i2c:    machine.I2C0,
 }

@@ -5,10 +5,11 @@ package bbq
 
 import (
 	"machine"
+	"uc-go/app/tempmon"
 	"uc-go/pkg/spi"
 )
 
-var cfg = BoardCfg{
+var cfg = tempmon.BoardCfg{
 	//Rfm: rfm69_board.PinCfg{
 	//	Spi: machine.SPI0,
 	//	SpiCfg: &machine.SPIConfig{
@@ -25,7 +26,7 @@ var cfg = BoardCfg{
 
 	led: machine.LED,
 
-	Tcs: []*ThermocoupleCfg{
+	Tcs: []*tempmon.ThermocoupleCfg{
 		{
 			Name: "bbq01-meat",
 			Spi: &spi.Config{

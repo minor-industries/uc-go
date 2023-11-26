@@ -9,14 +9,15 @@ import (
 	"sync"
 	"time"
 	"tinygo.org/x/drivers/aht20"
-	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/logger"
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/schema"
+	"uc-go/pkg/spi"
 )
 
 const dstAddr = 2
 
-func Run(logs *rpc.Queue) error {
+func Run(logs logger.Logger) error {
 	env, err := rfm69_board.LoadConfig(logs)
 	if err != nil {
 		return errors.Wrap(err, "load config")
@@ -33,10 +34,7 @@ func Run(logs *rpc.Queue) error {
 
 	i2c := cfg.i2c
 
-	err = i2c.Configure(machine.I2CConfig{
-		SDA: cfg.sda,
-		SCL: cfg.scl,
-	})
+	err = i2c.Configure(*cfg.i2cCfg)
 	if err != nil {
 		return errors.Wrap(err, "configure i2c")
 	}
@@ -51,11 +49,12 @@ func Run(logs *rpc.Queue) error {
 
 	envSnapshot := env.SnapShot()
 	spiLock := new(sync.Mutex)
+	radioSpi := spi.NewSPI(cfg.Rfm.Spi, spiLock)
 
 	radio, err := rfm69_board.SetupRfm69(
 		&envSnapshot,
 		&cfg.Rfm,
-		spiLock,
+		radioSpi,
 		log,
 	)
 	if err != nil {
@@ -91,7 +90,7 @@ func ledControl(done <-chan struct{}) {
 }
 
 func mainLoop(
-	logs *rpc.Queue,
+	logs logger.Logger,
 	radio *rfm69.Radio,
 	randSource *rand.Rand,
 	sensor aht20.Device,
