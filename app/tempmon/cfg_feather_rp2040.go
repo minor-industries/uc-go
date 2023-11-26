@@ -1,6 +1,6 @@
 //go:build feather_rp2040
 
-package radio
+package tempmon
 
 import "machine"
 

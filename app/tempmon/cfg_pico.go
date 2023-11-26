@@ -1,6 +1,6 @@
 //go:build pico
 
-package radio
+package tempmon
 
 import (
 	"machine"
