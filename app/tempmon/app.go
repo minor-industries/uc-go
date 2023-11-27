@@ -22,6 +22,7 @@ func Run(logs logger.Logger) error {
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
+	envSnapshot := env.SnapShot()
 
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
@@ -33,6 +34,8 @@ func Run(logs logger.Logger) error {
 	}()
 
 	<-time.After(2 * time.Second)
+
+	fmt.Printf("address is 0x%02x\n", envSnapshot.NodeAddr)
 
 	i2c := cfg.i2c
 
@@ -49,7 +52,6 @@ func Run(logs logger.Logger) error {
 		logs.Log(s)
 	}
 
-	envSnapshot := env.SnapShot()
 	spiLock := new(sync.Mutex)
 	radioSpi := spi.NewSPI(cfg.Rfm.Spi, spiLock)
 
