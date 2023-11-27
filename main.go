@@ -13,7 +13,7 @@ func (l *logger) Log(s string) {
 }
 
 func (l *logger) Error(err error) {
-	fmt.Println("error: " + err.Error())
+	fmt.Printf("error: %v\n", err)
 }
 
 func (l *logger) Rpc(s string, i interface{}) error {
