@@ -13,12 +13,20 @@ import (
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/schema"
 	"uc-go/pkg/spi"
+	"uc-go/pkg/storage"
 )
 
 const dstAddr = 2
 
 func Run(logs logger.Logger) error {
-	env, err := rfm69_board.LoadConfig(logs)
+	<-time.After(2 * time.Second)
+
+	lfs, err := storage.Setup(logs)
+	if err != nil {
+		return errors.Wrap(err, "setup storage")
+	}
+
+	env, err := rfm69_board.LoadConfig(logs, lfs, false)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
@@ -32,8 +40,6 @@ func Run(logs logger.Logger) error {
 		<-time.After(5 * time.Second)
 		close(stopLeds)
 	}()
-
-	<-time.After(2 * time.Second)
 
 	fmt.Printf("address is 0x%02x\n", envSnapshot.NodeAddr)
 

@@ -14,7 +14,12 @@ const newAddr = 0xD0
 func Run(logs logger.Logger) error {
 	<-time.After(5 * time.Second)
 
-	env, err := rfm69_board.LoadConfig(logs)
+	lfs, err := storage.Setup(logs)
+	if err != nil {
+		return errors.Wrap(err, "setup storage")
+	}
+
+	env, err := rfm69_board.LoadConfig(logs, lfs)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
@@ -24,15 +29,6 @@ func Run(logs logger.Logger) error {
 
 	if ss.NodeAddr != newAddr {
 		ss.NodeAddr = newAddr
-
-		lfs, err := storage.Setup(logs)
-		if err != nil {
-			return errors.Wrap(err, "setup storage")
-		}
-
-		if lfs == nil {
-			return errors.New("no lfs")
-		}
 
 		if err := storage.WriteMsgp(logs, lfs, &ss, "/radio-cfg.msgp"); err != nil {
 			return errors.Wrap(err, "write msgp")

@@ -16,10 +16,16 @@ func LoadConfig[T Serializer](
 	lfs *littlefs.LFS,
 	logs logger.Logger,
 	filename string,
+	forceReInit bool,
 	initConfig T,
 ) (T, error) {
+	if forceReInit {
+		return initConfig, WriteMsgp(logs, lfs, initConfig, filename)
+	}
+
 	_, err := lfs.Stat(filename)
 	if err != nil {
+		logs.Error(errors.Wrap(err, "stat failed"))
 		return initConfig, WriteMsgp(logs, lfs, initConfig, filename)
 	}
 
