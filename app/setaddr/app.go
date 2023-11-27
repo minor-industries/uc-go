@@ -37,6 +37,8 @@ func Run(logs logger.Logger) error {
 		if err := storage.WriteMsgp(logs, lfs, &ss, "/radio-cfg.msgp"); err != nil {
 			return errors.Wrap(err, "write msgp")
 		}
+
+		fmt.Printf("set new address to 0x%02x\n", ss.NodeAddr)
 	}
 
 	return nil

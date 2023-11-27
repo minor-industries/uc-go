@@ -24,5 +24,6 @@ func (l *logger) Rpc(s string, i interface{}) error {
 func main() {
 	logs := &logger{}
 	err := tempmon.Run(logs)
+	//err := setaddr.Run(logs)
 	logs.Error(errors.Wrap(err, "bbq exited"))
 }
