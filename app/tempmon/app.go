@@ -106,6 +106,8 @@ func mainLoop(
 	randSource *rand.Rand,
 	sensor aht20.Device,
 ) error {
+	radio.SetMode(rfm69.ModeSleep)
+
 	readAndSend := func() error {
 		err := sensor.Read()
 		if err != nil {
