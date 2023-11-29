@@ -31,6 +31,7 @@ func Run(logs logger.Logger) error {
 		return errors.Wrap(err, "load config")
 	}
 	envSnapshot := env.SnapShot()
+	envSnapshot.NodeAddr = 0xD0 // TODO: need to fix this config stuff
 
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
@@ -118,7 +119,13 @@ func mainLoop(
 			RelativeHumidity: sensor.RelHumidity(),
 		}
 
-		return rfm69_board.SendMsg(radio, dstAddr, 1, body)
+		if err := rfm69_board.SendMsg(radio, dstAddr, 1, body); err != nil {
+			return errors.Wrap(err, "send msg")
+		}
+
+		radio.SetMode(rfm69.ModeSleep)
+
+		return nil
 	}
 
 	for {
