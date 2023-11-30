@@ -1,11 +1,11 @@
 package tempmon
 
 import (
+	"device/arm"
 	"fmt"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
-	"math/rand"
 	"sync"
 	"time"
 	"tinygo.org/x/drivers/aht20"
@@ -19,7 +19,7 @@ import (
 const dstAddr = 2
 
 func Run(logs logger.Logger) error {
-	<-time.After(2 * time.Second)
+	<-time.After(10 * time.Second)
 
 	lfs, err := storage.Setup(logs)
 	if err != nil {
@@ -75,7 +75,6 @@ func Run(logs logger.Logger) error {
 	err = mainLoop(
 		logs,
 		radio,
-		rand.New(rand.NewSource(int64(envSnapshot.NodeAddr))),
 		sensor,
 	)
 	if err != nil {
@@ -103,7 +102,6 @@ func ledControl(done <-chan struct{}) {
 func mainLoop(
 	logs logger.Logger,
 	radio *rfm69.Radio,
-	randSource *rand.Rand,
 	sensor aht20.Device,
 ) error {
 	radio.SetMode(rfm69.ModeSleep)
@@ -135,7 +133,33 @@ func mainLoop(
 			logs.Error(err)
 		}
 
-		sleep := time.Duration(4000+randSource.Intn(2000)) * time.Millisecond
-		time.Sleep(sleep)
+		pause()
 	}
 }
+
+func pause() {
+	end := time.Now().Add(5 * time.Second)
+	for {
+		SleepDeep()
+		if time.Now().After(end) {
+			return
+		}
+	}
+}
+
+// SleepDeep enters STOP (deep sleep) mode
+func SleepDeep() {
+	// set SLEEPDEEP to enable deep sleep
+
+	//arm.SCB.SCR.SetBits(arm.SCB_SCR_SLEEPDEEP)
+	arm.Asm("wfi")
+}
+
+//// Wait enters WAIT (sleep) mode
+//func Wait() {
+//	// clear SLEEPDEEP bit to disable deep sleep
+//	nxp.SystemControl.SCR.ClearBits(nxp.SystemControl_SCR_SLEEPDEEP)
+//
+//	// enter WAIT mode
+//	arm.Asm("wfi")
+//}
