@@ -1,25 +1,37 @@
-package blink
+package main
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
+	"image/color"
 	"machine"
 	"time"
-	"uc-go/pkg/protocol/rpc"
+	"tinygo.org/x/drivers/ws2812"
 )
 
-const dstAddr = 2
+func main() {
+	<-time.After(2 * time.Second)
 
-func Run(logs *rpc.Queue) error {
-	go func() {
-		for {
-			logs.Log(time.Now().String())
-			time.Sleep(1000 * time.Millisecond)
-		}
-	}()
+	led := machine.A0
+	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	machine.NEOPIXELS_POWER.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	machine.NEOPIXELS_POWER.High()
+
+	machine.NEOPIXELS.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	neo := ws2812.New(machine.NEOPIXELS)
+	if err := neo.WriteColors([]color.RGBA{{0, 0, 16, 0}}); err != nil {
+		fmt.Println(errors.Wrap(err, "write neopixel"))
+	}
+
+	fmt.Println("should be active")
 
 	for {
-		machine.LED.High()
-		time.Sleep(50 * time.Millisecond)
-		machine.LED.Low()
-		time.Sleep(50 * time.Millisecond)
+		led.High()
+		neo.WriteColors([]color.RGBA{{0, 0, 16, 0}})
+		<-time.After(time.Second)
+		led.Low()
+		neo.WriteColors([]color.RGBA{{0, 0, 0, 0}})
+		<-time.After(time.Second)
 	}
 }
