@@ -1,12 +1,13 @@
 package blikenlights
 
 import (
-	"machine"
 	"time"
 )
 
+type Blinker func(on bool)
+
 type Light struct {
-	led    machine.Pin
+	led    Blinker
 	ctrl   chan []int
 	seq    []int
 	pos    int
@@ -14,7 +15,7 @@ type Light struct {
 	ticker *time.Ticker
 }
 
-func NewLight(led machine.Pin) *Light {
+func NewLight(led Blinker) *Light {
 	return &Light{
 		led:    led,
 		ctrl:   make(chan []int),
@@ -52,7 +53,7 @@ func (li *Light) tick() {
 	li.remain--
 
 	on := li.pos%2 == 1
-	li.led.Set(on)
+	li.led(on)
 }
 
 func (li *Light) Seq(seq []int) {

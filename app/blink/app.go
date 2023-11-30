@@ -7,6 +7,7 @@ import (
 	"machine"
 	"time"
 	"tinygo.org/x/drivers/ws2812"
+	"uc-go/pkg/blikenlights"
 )
 
 func main() {
@@ -26,12 +27,20 @@ func main() {
 
 	fmt.Println("should be active")
 
-	for {
-		led.High()
-		neo.WriteColors([]color.RGBA{{0, 0, 16, 0}})
-		<-time.After(time.Second)
-		led.Low()
-		neo.WriteColors([]color.RGBA{{0, 0, 0, 0}})
-		<-time.After(time.Second)
-	}
+	bl := blikenlights.NewLight(func(on bool) {
+		if on {
+			neo.WriteColors([]color.RGBA{{0, 0, 16, 0}})
+		} else {
+			neo.WriteColors([]color.RGBA{{0, 16, 0, 0}})
+		}
+	})
+	go bl.Run()
+
+	bl.Seq([]int{2, 2})
+
+	<-time.After(5 * time.Second)
+
+	bl.Seq([]int{2, 10})
+
+	select {}
 }
