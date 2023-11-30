@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 	"tinygo.org/x/drivers/aht20"
+	"uc-go/pkg/blikenlights"
 	"uc-go/pkg/logger"
 	rfm69_board "uc-go/pkg/rfm69-board"
 	"uc-go/pkg/schema"
@@ -19,7 +20,14 @@ import (
 const dstAddr = 2
 
 func Run(logs logger.Logger) error {
+	bl := blikenlights.NewLight(&blinker)
+	go bl.Run()
+	bl.Seq([]int{2, 2})
+
 	<-time.After(10 * time.Second)
+	fmt.Println("start")
+
+	bl.Seq([]int{2, 4})
 
 	lfs, err := storage.Setup(logs)
 	if err != nil {

@@ -9,7 +9,9 @@ const (
 	Long = math.MaxInt32
 )
 
-type Blinker func(on bool)
+type Blinker interface {
+	Set(on bool)
+}
 
 type Light struct {
 	led  Blinker
@@ -47,7 +49,7 @@ func (li *Light) Run() {
 
 func (li *Light) reset() {
 	if len(li.seq) == 0 {
-		li.led(false)
+		li.led.Set(false)
 		return
 	}
 
@@ -70,7 +72,7 @@ func (li *Light) tick() {
 	li.remain--
 
 	on := li.pos%2 == 0
-	li.led(on)
+	li.led.Set(on)
 }
 
 func (li *Light) Seq(seq []int) {

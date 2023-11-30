@@ -23,13 +23,13 @@ func main() {
 		fmt.Println(errors.Wrap(err, "write neopixel"))
 	}
 
-	bl := blikenlights.NewLight(func(on bool) {
+	bl := blikenlights.NewLight(blikenlights.BlinkerFunc(func(on bool) {
 		if on {
 			neo.WriteColors([]color.RGBA{{0, 0, 16, 0}})
 		} else {
 			neo.WriteColors([]color.RGBA{{0, 0, 0, 0}})
 		}
-	})
+	}))
 	go bl.Run()
 
 	bl.Off()
