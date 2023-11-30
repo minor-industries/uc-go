@@ -1,7 +1,12 @@
 package blikenlights
 
 import (
+	"math"
 	"time"
+)
+
+const (
+	Long = math.MaxInt32
 )
 
 type Blinker func(on bool)
@@ -52,7 +57,7 @@ func (li *Light) tick() {
 	}
 	li.remain--
 
-	on := li.pos%2 == 1
+	on := li.pos%2 == 0
 	li.led(on)
 }
 

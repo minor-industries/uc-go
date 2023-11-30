@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	<-time.After(2 * time.Second)
-
 	led := machine.A0
 	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
@@ -25,22 +23,20 @@ func main() {
 		fmt.Println(errors.Wrap(err, "write neopixel"))
 	}
 
-	fmt.Println("should be active")
-
 	bl := blikenlights.NewLight(func(on bool) {
 		if on {
 			neo.WriteColors([]color.RGBA{{0, 0, 16, 0}})
 		} else {
-			neo.WriteColors([]color.RGBA{{0, 16, 0, 0}})
+			neo.WriteColors([]color.RGBA{{0, 0, 0, 0}})
 		}
 	})
 	go bl.Run()
 
 	bl.Seq([]int{2, 2})
 
-	<-time.After(5 * time.Second)
+	<-time.After(1 * time.Second)
 
-	bl.Seq([]int{2, 10})
+	bl.Seq([]int{4, 4, 4, 4, 4, 32})
 
 	select {}
 }
