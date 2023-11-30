@@ -19,15 +19,19 @@ import (
 
 const dstAddr = 2
 
+var tStart time.Time
+
 func Run(logs logger.Logger) error {
+	tStart = time.Now()
+
 	bl := blikenlights.NewLight(&blinker)
 	go bl.Run()
-	bl.Seq([]int{2, 2})
+	bl.Seq([]int{4, 4})
 
-	<-time.After(10 * time.Second)
+	<-time.After(2 * time.Second)
 	fmt.Println("start")
 
-	bl.Seq([]int{2, 4})
+	bl.Seq([]int{2, 2})
 
 	lfs, err := storage.Setup(logs)
 	if err != nil {
@@ -141,7 +145,14 @@ func mainLoop(
 			logs.Error(err)
 		}
 
-		pause()
+		afterStartupDelay := time.Now().Sub(tStart) > 20*time.Second
+
+		if afterStartupDelay {
+			pause()
+		} else {
+			<-time.After(5 * time.Second)
+		}
+
 	}
 }
 
