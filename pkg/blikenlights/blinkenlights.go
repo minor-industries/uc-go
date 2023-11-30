@@ -81,8 +81,10 @@ func (li *Light) Seq(seq []int) {
 
 func (li *Light) Off() {
 	li.ctrl <- nil
+	li.led.Set(false)
 }
 
 func (li *Light) On() {
 	li.ctrl <- []int{Long, 0}
+	li.led.Set(true)
 }

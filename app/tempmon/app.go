@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
-	"machine"
 	"sync"
 	"time"
 	"tinygo.org/x/drivers/aht20"
@@ -45,15 +44,6 @@ func Run(logs logger.Logger) error {
 	envSnapshot := env.SnapShot()
 	envSnapshot.NodeAddr = 0xD0 // TODO: need to fix this config stuff
 
-	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	stopLeds := make(chan struct{})
-	go ledControl(stopLeds)
-	go func() {
-		<-time.After(5 * time.Second)
-		close(stopLeds)
-	}()
-
 	fmt.Printf("address is 0x%02x\n", envSnapshot.NodeAddr)
 
 	i2c := cfg.i2c
@@ -86,6 +76,7 @@ func Run(logs logger.Logger) error {
 
 	err = mainLoop(
 		logs,
+		bl,
 		radio,
 		sensor,
 	)
@@ -96,29 +87,19 @@ func Run(logs logger.Logger) error {
 	return errors.New("run exited")
 }
 
-func ledControl(done <-chan struct{}) {
-	ticker := time.NewTicker(100 * time.Millisecond)
-	val := true
-
-	for {
-		select {
-		case <-ticker.C:
-			cfg.led.Set(val)
-			val = !val
-		case <-done:
-			return
-		}
-	}
-}
-
 func mainLoop(
 	logs logger.Logger,
+	bl *blikenlights.Light,
 	radio *rfm69.Radio,
 	sensor aht20.Device,
 ) error {
 	radio.SetMode(rfm69.ModeSleep)
 
 	readAndSend := func() error {
+		bl.On()
+		<-time.After(25 * time.Millisecond)
+		bl.Off()
+
 		err := sensor.Read()
 		if err != nil {
 			return errors.Wrap(err, "read sensor")
