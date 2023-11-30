@@ -32,11 +32,15 @@ func main() {
 	})
 	go bl.Run()
 
-	bl.Seq([]int{2, 2})
+	bl.Off()
 
-	<-time.After(1 * time.Second)
+	<-time.After(5 * time.Second)
 
-	bl.Seq([]int{4, 4, 4, 4, 4, 32})
+	bl.On()
+
+	<-time.After(5 * time.Second)
+
+	bl.Seq([]int{4, 4, 4, 16})
 
 	select {}
 }
