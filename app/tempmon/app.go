@@ -1,7 +1,6 @@
 package tempmon
 
 import (
-	"device/arm"
 	"fmt"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
@@ -152,7 +151,8 @@ func SleepDeep() {
 	// set SLEEPDEEP to enable deep sleep
 
 	//arm.SCB.SCR.SetBits(arm.SCB_SCR_SLEEPDEEP)
-	arm.Asm("wfi")
+	//arm.Asm("wfi")
+	<-time.After(time.Second)
 }
 
 //// Wait enters WAIT (sleep) mode
