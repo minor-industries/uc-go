@@ -1,10 +1,9 @@
 package main
 
 import (
+	"device/arm"
 	"device/sam"
-	"fmt"
 	"machine"
-	"runtime/interrupt"
 	"time"
 	"uc-go/pkg/blikenlights"
 )
@@ -23,14 +22,11 @@ func main() {
 	bl.Seq([]int{2, 2})
 
 	<-time.After(5 * time.Second)
-	bl.Seq([]int{2, 4})
+	bl.Off()
 
 	intr := machine.D1
 	intr.Configure(machine.PinConfig{Mode: machine.PinInput})
-	if err := intr.SetInterrupt(machine.PinRising, callback); err != nil {
-		fmt.Println("error:", err.Error())
-		bl.Seq([]int{2, 2, 2, 16})
-	}
+	intr.SetInterrupt(machine.PinRising, callback)
 
 	configGCLK6()
 	//
@@ -41,63 +37,91 @@ func main() {
 	for sam.EIC.STATUS.HasBits(sam.EIC_STATUS_SYNCBUSY) {
 	}
 
-	interrupt.New(sam.IRQ_RTC, func(i interrupt.Interrupt) {
-		state = !state
-		machine.LED.Set(state)
-	})
+	//interrupt.New(sam.IRQ_RTC, func(i interrupt.Interrupt) {
+	//})
 
-	sam.PM.APBAMASK.SetBits(sam.PM_APBAMASK_GCLK_ | sam.PM_APBAMASK_EIC_)
+	sam.PM.APBAMASK.SetBits(sam.PM_APBAMASK_GCLK_ |
+		sam.PM_APBAMASK_EIC_ |
+		sam.PM_APBAMASK_RTC_)
 
+	machine.LED.Low()
+	count := 0
 	for {
 		sleep()
+		count++
+		if count%100 == 0 {
+			state = !state
+			machine.LED.Set(state)
+		}
+		//time.Sleep(50 * time.Millisecond)
 	}
 }
 
 func configGCLK6() {
 	sam.GCLK.CLKCTRL.ClearBits(sam.GCLK_CLKCTRL_CLKEN)
-	waitClockSync()
+	waitForSync()
 
 	//sam.GCLK.CLKCTRL.Set(sam.GCLK_CLKCTRL_ID_EIC<<sam.GCLK_CLKCTRL_ID_Pos |
 	//	sam.GCLK_CLKCTRL_GEN_GCLK0<<sam.GCLK_CLKCTRL_GEN_Pos |
 	//	sam.GCLK_CLKCTRL_CLKEN)
-	//waitClockSync()
+	//waitForSync()
 
 	// *****************
 	sam.GCLK.GENDIV.Set(6 << sam.GCLK_GENDIV_ID_Pos)
-	waitClockSync()
+	waitForSync()
 
 	sam.GCLK.GENCTRL.Set((6 << sam.GCLK_GENCTRL_ID_Pos) |
 		(sam.GCLK_GENCTRL_SRC_OSCULP32K << sam.GCLK_GENCTRL_SRC_Pos) |
-		sam.GCLK_GENCTRL_RUNSTDBY |
+		sam.GCLK_GENCTRL_RUNSTDBY | // this one is always on
 		sam.GCLK_GENCTRL_GENEN)
-	waitClockSync()
+	waitForSync()
 
 	sam.GCLK.CLKCTRL.Set((sam.GCLK_CLKCTRL_ID_EIC << sam.GCLK_CLKCTRL_ID_Pos) |
 		(sam.GCLK_CLKCTRL_GEN_GCLK6 << sam.GCLK_CLKCTRL_GEN_Pos) |
 		sam.GCLK_CLKCTRL_CLKEN)
-	waitClockSync()
+	waitForSync()
 	// *****************
+
+	sam.GCLK.GENDIV.Set(2 << sam.GCLK_GENDIV_ID_Pos)
+	waitForSync()
+
+	sam.GCLK.GENCTRL.Set((2 << sam.GCLK_GENCTRL_ID_Pos) |
+		(sam.GCLK_GENCTRL_SRC_OSC32K << sam.GCLK_GENCTRL_SRC_Pos) |
+		sam.GCLK_GENCTRL_GENEN)
+	waitForSync()
+
+	sam.GCLK.GENCTRL.SetBits(sam.GCLK_GENCTRL_RUNSTDBY)
+	waitForSync()
+
+	//GCLK->GENCTRL.bit.RUNSTDBY = 1;  //GCLK6 run standby
+	//sam.GCLK_GENCTRL_RUNSTDBY |
+
+	// Use GCLK2 for RTC
+	sam.GCLK.CLKCTRL.Set((sam.GCLK_CLKCTRL_ID_RTC << sam.GCLK_CLKCTRL_ID_Pos) |
+		(sam.GCLK_CLKCTRL_GEN_GCLK2 << sam.GCLK_CLKCTRL_GEN_Pos) |
+		sam.GCLK_CLKCTRL_CLKEN)
+	waitForSync()
 
 	//sam.GCLK.CLKCTRL.Set(sam.GCLK_CLKCTRL_ID_EIC<<sam.GCLK_CLKCTRL_ID_Pos |
 	//	sam.GCLK_CLKCTRL_GEN_GCLK0<<sam.GCLK_CLKCTRL_GEN_Pos |
 	//	sam.GCLK_CLKCTRL_CLKEN)
-	//waitClockSync()
+	//waitForSync()
 
 	//sam.GCLK.CLKCTRL.SetBits(sam.GCLK_CLKCTRL_CLKEN | sam.GCLK_CLKCTRL_GEN_GCLK6 | sam.GCLK_CLKCTRL_ID_EIC)
-	//waitClockSync()
+	//waitForSync()
 	//}
 
 	//sam.GCLK.GENCTRL.Set(sam.GCLK_GENCTRL_RUNSTDBY | sam.GCLK_GENCTRL_)
-	//waitClockSync()
+	//waitForSync()
 	//}
 
 	sam.GCLK.CLKCTRL.SetBits(sam.GCLK_CLKCTRL_CLKEN)
-	waitClockSync()
+	waitForSync()
 	//
-	//sam.NVMCTRL.CTRLB.SetBits(sam.NVMCTRL_CTRLB_SLEEPPRM_DISABLED)
+	sam.NVMCTRL.CTRLB.SetBits(sam.NVMCTRL_CTRLB_SLEEPPRM_DISABLED)
 }
 
-func waitClockSync() {
+func waitForSync() {
 	for sam.GCLK.STATUS.HasBits(sam.GCLK_STATUS_SYNCBUSY) {
 	}
 }
@@ -126,7 +150,6 @@ static void configGCLK6()
 */
 
 func sleep() {
-	time.Sleep(100 * time.Millisecond)
-	//arm.SCB.SCR.SetBits(arm.SCB_SCR_SLEEPDEEP)
-	//arm.Asm("wfi")
+	arm.SCB.SCR.SetBits(arm.SCB_SCR_SLEEPDEEP)
+	arm.Asm("wfi")
 }
