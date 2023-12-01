@@ -1,10 +1,10 @@
 package main
 
 import (
-	"device/arm"
 	"device/sam"
 	"fmt"
 	"machine"
+	"runtime/interrupt"
 	"time"
 	"uc-go/pkg/blikenlights"
 )
@@ -35,7 +35,17 @@ func main() {
 	configGCLK6()
 	//
 	//sam.PM.SetSLEEP_IDLE()
-	sam.EIC.WAKEUP.Set(0x0000FFFF)
+	//sam.EIC.WAKEUP.Set(0x00000000)
+	//sam.EIC.WAKEUP.ClearBits(1 << intr)
+	sam.EIC.WAKEUP.SetBits(1 << intr)
+	for sam.EIC.STATUS.HasBits(sam.EIC_STATUS_SYNCBUSY) {
+	}
+
+	interrupt.New(sam.IRQ_RTC, func(i interrupt.Interrupt) {
+		state = !state
+		machine.LED.Set(state)
+	})
+
 	sam.PM.APBAMASK.SetBits(sam.PM_APBAMASK_GCLK_ | sam.PM_APBAMASK_EIC_)
 
 	for {
@@ -116,6 +126,7 @@ static void configGCLK6()
 */
 
 func sleep() {
-	arm.SCB.SCR.SetBits(arm.SCB_SCR_SLEEPDEEP)
-	arm.Asm("wfi")
+	time.Sleep(100 * time.Millisecond)
+	//arm.SCB.SCR.SetBits(arm.SCB_SCR_SLEEPDEEP)
+	//arm.Asm("wfi")
 }
