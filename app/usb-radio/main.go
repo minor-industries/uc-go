@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
@@ -89,7 +90,10 @@ func run(log *logger) error {
 	packets := make(chan *rfm69.Packet)
 	go func() {
 		for p := range packets {
-			log.Log(fmt.Sprintf("got packet: RSSI=%d", p.RSSI))
+			msg, _ := p.MarshalMsg(nil)
+			enc := base64.StdEncoding.EncodeToString(msg)
+			//log.Log(fmt.Sprintf("got packet: RSSI=%d, msg=%s", p.RSSI, enc))
+			_ = log.Rpc("RADIO-TX", enc)
 		}
 	}()
 
