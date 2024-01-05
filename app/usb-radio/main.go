@@ -61,7 +61,7 @@ func run(log *logger) error {
 				LSBFirst:  false,
 				Mode:      0,
 			},
-			Cs: 0,
+			Cs: machine.PA14,
 		},
 		rfmSPILock,
 	)
