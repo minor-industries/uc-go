@@ -5,6 +5,7 @@ import (
 	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
+	"strings"
 	"sync"
 	"time"
 	"uc-go/pkg/blikenlights"
@@ -16,15 +17,15 @@ import (
 type logger struct{}
 
 func (l *logger) Log(s string) {
-	fmt.Println(s)
+	fmt.Printf("LOG %s\n", strings.TrimSpace(s))
 }
 
 func (l *logger) Error(err error) {
-	fmt.Printf("error: %v\n", err)
+	fmt.Printf("ERROR %v\n", err)
 }
 
 func (l *logger) Rpc(s string, i interface{}) error {
-	fmt.Println("rpc: " + s)
+	fmt.Printf("RPC %s %v\n", s, i)
 	return nil
 }
 
