@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/minor-industries/rfm69"
 	"github.com/pkg/errors"
 	"machine"
 	"sync"
@@ -66,10 +67,10 @@ func run(log *logger) error {
 		rfmSPILock,
 	)
 
-	_, err := rfm69_board.SetupRfm69(
+	radio, err := rfm69_board.SetupRfm69(
 		&rfmCfg.Config{
-			NodeAddr: 100,
-			TxPower:  20,
+			NodeAddr: 2,
+			TxPower:  20, // TODO: what value here?
 		},
 		rfmSPI,
 		&rfm69_board.PinCfg{
@@ -84,12 +85,15 @@ func run(log *logger) error {
 		log.Error(errors.Wrap(err, "setup radio"))
 	}
 
-	ticker := time.NewTicker(time.Second)
-	for range ticker.C {
-		log.Log("hello")
-	}
+	packets := make(chan *rfm69.Packet)
+	go func() {
+		for p := range packets {
+			log.Log(fmt.Sprintf("got packet: RSSI=%d", p.RSSI))
+		}
+	}()
 
-	return nil
+	err = radio.Rx(packets)
+	return errors.Wrap(err, "rx")
 }
 
 func main() {
