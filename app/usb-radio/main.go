@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"machine"
+	"time"
 	"uc-go/pkg/blikenlights"
 )
 
@@ -37,7 +38,13 @@ func main() {
 		led: machine.PA07,
 	}
 
+	log := &logger{}
+
 	setupLeds(cfg)
 
-	select {}
+	ticker := time.NewTicker(time.Second)
+
+	for range ticker.C {
+		log.Log("hello")
+	}
 }
