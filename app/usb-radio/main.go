@@ -2,9 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"machine"
+	"sync"
 	"time"
 	"uc-go/pkg/blikenlights"
+	rfm69_board "uc-go/pkg/rfm69-board"
+	rfmCfg "uc-go/pkg/rfm69-board/cfg"
+	"uc-go/pkg/spi"
 )
 
 type logger struct{}
@@ -26,25 +31,74 @@ type Cfg struct {
 	led machine.Pin
 }
 
-func setupLeds(cfg *Cfg) {
+func setupLeds(cfg *Cfg) *blikenlights.Light {
 	cfg.led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	bl := blikenlights.NewLight(cfg.led)
 	go bl.Run()
 	bl.Seq([]int{2, 2})
+	return bl
 }
 
-func main() {
-	cfg := &Cfg{
+func run(log *logger) error {
+	env := &Cfg{
 		led: machine.PA07,
 	}
 
-	log := &logger{}
+	bl := setupLeds(env)
 
-	setupLeds(cfg)
+	<-time.After(5 * time.Second)
+	bl.Seq([]int{4, 4})
+
+	rfmSPILock := new(sync.Mutex)
+	rfmSPI := spi.NewSPI(
+		&spi.Config{
+			Spi: &machine.SPI0,
+			Config: &machine.SPIConfig{
+				Frequency: 0,
+				SCK:       machine.PA11,
+				SDO:       machine.PA10,
+				SDI:       machine.PA09,
+				LSBFirst:  false,
+				Mode:      0,
+			},
+			Cs: 0,
+		},
+		rfmSPILock,
+	)
+
+	_, err := rfm69_board.SetupRfm69(
+		&rfmCfg.Config{
+			NodeAddr: 100,
+			TxPower:  20,
+		},
+		rfmSPI,
+		&rfm69_board.PinCfg{
+			Rst:  machine.PA15,
+			Intr: machine.PA03,
+		},
+		func(s string) {
+			log.Log(s)
+		},
+	)
+	if err != nil {
+		log.Error(errors.Wrap(err, "setup radio"))
+	}
 
 	ticker := time.NewTicker(time.Second)
-
 	for range ticker.C {
 		log.Log("hello")
+	}
+
+	return nil
+}
+
+func main() {
+	log := &logger{}
+
+	err := run(log)
+	if err != nil {
+		log.Error(errors.Wrap(err, "run exited with error"))
+	} else {
+		log.Log("run exited")
 	}
 }

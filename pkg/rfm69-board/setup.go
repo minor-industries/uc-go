@@ -13,24 +13,21 @@ import (
 )
 
 type PinCfg struct {
-	// rfm
-	Spi *spi.Config
-
 	Rst  machine.Pin
 	Intr machine.Pin
 }
 
 func SetupRfm69(
 	env *cfg.Config,
+	Spi *spi.SPI,
 	cfg *PinCfg,
-	spi *spi.SPI,
 	log func(s string),
 ) (*rfm69.Radio, error) {
 	rst := cfg.Rst
 	rst.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
 	board, err := NewBoard(
-		spi,
+		Spi,
 		rst,
 		cfg.Intr,
 		log,
