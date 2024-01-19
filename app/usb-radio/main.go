@@ -52,6 +52,11 @@ func run(log *logger) error {
 	<-time.After(5 * time.Second)
 	bl.Seq([]int{4, 4})
 
+	go func() {
+		<-time.After(30 * time.Second)
+		bl.Off()
+	}()
+
 	rfmSPILock := new(sync.Mutex)
 	rfmSPI := spi.NewSPI(
 		&spi.Config{
