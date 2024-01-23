@@ -11,8 +11,8 @@ func main() {
 
 	for {
 		led.High()
-		<-time.After(time.Second)
+		<-time.After(5 * time.Second)
 		led.Low()
-		<-time.After(time.Second)
+		<-time.After(5 * time.Second)
 	}
 }
