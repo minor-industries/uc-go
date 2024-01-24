@@ -44,7 +44,8 @@ func setupLeds(cfg *Cfg) *blikenlights.Light {
 
 func run(log *logger) error {
 	env := &Cfg{
-		led: machine.PA07,
+		//led: machine.PA07,
+		led: machine.PA23,
 	}
 
 	bl := setupLeds(env)
