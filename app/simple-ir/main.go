@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"machine"
+	"time"
 	"tinygo.org/x/drivers/irremote"
 )
 
@@ -18,10 +20,23 @@ func main() {
 	ir := irremote.NewReceiver(irPin)
 	ir.Configure()
 
+	ch := make(chan irremote.Data, 10)
+
 	ir.SetCommandHandler(func(data irremote.Data) {
-		value = !value
-		led.Set(value)
+		ch <- data
 	})
 
-	select {}
+	lastUpdate := time.Now()
+	for data := range ch {
+		now := time.Now()
+		elapsed := now.Sub(lastUpdate)
+		lastUpdate = now
+
+		fmt.Println("IR", data.Address, data.Code, elapsed)
+
+		if elapsed > time.Second {
+			value = !value
+			led.Set(value)
+		}
+	}
 }
