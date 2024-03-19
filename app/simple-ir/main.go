@@ -1,20 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"machine"
 	"tinygo.org/x/drivers/irremote"
 )
 
+const irPin = machine.PA15
+
+//const irPin = machine.D5
+
 func main() {
-	led := machine.PA23
-	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	value := true
-
-	led.Set(value)
-
-	irPin := machine.PA15
-
 	ir := irremote.NewReceiver(irPin)
 	ir.Configure()
 
@@ -24,13 +20,22 @@ func main() {
 		ch <- data
 	})
 
-	for data := range ch {
-		//fmt.Println("IR", data.Address, data.Code, data.Command)
-		switch data.Command {
-		case 16:
-			led.Low()
-		case 17:
-			led.High()
+	irCount := 0
+
+	for {
+		select {
+		case data := <-ch:
+			if data.Flags&irremote.DataFlagIsRepeat != 0 {
+				continue
+			}
+			switch data.Command {
+			case 16:
+				irCount++
+			case 17:
+				irCount--
+			}
+
+			fmt.Println(irCount)
 		}
 	}
 }
