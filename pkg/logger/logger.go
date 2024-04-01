@@ -5,3 +5,5 @@ type Logger interface {
 	Error(err error)
 	Rpc(string, interface{}) error
 }
+
+var DefaultLogger = &PrintfLogger{}

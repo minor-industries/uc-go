@@ -1,29 +1,18 @@
 package main
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
-	"uc-go/app/tempmon"
+	"uc-go/app/bikelights"
+	"uc-go/pkg/logger"
 )
 
-type logger struct{}
-
-func (l *logger) Log(s string) {
-	fmt.Println(s)
-}
-
-func (l *logger) Error(err error) {
-	fmt.Printf("error: %v\n", err)
-}
-
-func (l *logger) Rpc(s string, i interface{}) error {
-	fmt.Println("rpc: " + s)
-	return nil
-}
-
 func main() {
-	logs := &logger{}
-	err := tempmon.Run(logs)
-	//err := setaddr.Run(logs)
+	logs := logger.DefaultLogger
+
+	app := bikelights.App{
+		Logs: logs,
+	}
+
+	err := app.Run()
 	logs.Error(errors.Wrap(err, "run exited"))
 }

@@ -1,3 +1,5 @@
+//go:build rp2040
+
 package leds
 
 import (

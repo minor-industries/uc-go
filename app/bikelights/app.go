@@ -8,7 +8,7 @@ import (
 	"uc-go/app/bikelights/cfg"
 	"uc-go/pkg/ir"
 	"uc-go/pkg/leds"
-	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/logger"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
 	"uc-go/wifi"
@@ -19,7 +19,7 @@ const (
 )
 
 type App struct {
-	Logs *rpc.Queue
+	Logs logger.Logger
 	Lfs  *littlefs.LFS
 	Cfg  *util.SyncConfig[cfg.Config]
 }
@@ -44,6 +44,7 @@ func (a *App) Run() error {
 		a.Lfs,
 		a.Logs,
 		a.ConfigFile(),
+		false,
 		&cfg.DefaultConfig,
 	)
 	if err != nil {

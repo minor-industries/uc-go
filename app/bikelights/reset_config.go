@@ -1,31 +1,26 @@
 package bikelights
 
 import (
-	"os"
 	"uc-go/app/bikelights/cfg"
-	"uc-go/pkg/protocol/rpc"
+	"uc-go/pkg/logger"
 	"uc-go/pkg/storage"
 )
 
-func resetConfig() {
-	logs := rpc.NewQueue(os.Stdout, 100)
-
-	lfs, err := storage.Setup(logs)
+func resetConfig(logger logger.Logger) {
+	lfs, err := storage.Setup(logger)
 	if err != nil {
 		panic("no")
 	}
 
-	if err := storage.WriteMsgp(logs, lfs, &cfg.DefaultConfig, "/cfg.msgp"); err != nil {
+	if err := storage.WriteMsgp(logger, lfs, &cfg.DefaultConfig, "/cfg.msgp"); err != nil {
 		panic("no")
 	}
 
 	select {}
 }
 
-func setConfig() {
-	logs := rpc.NewQueue(os.Stdout, 100)
-
-	lfs, err := storage.Setup(logs)
+func setConfig(logger logger.Logger) {
+	lfs, err := storage.Setup(logger)
 	if err != nil {
 		panic("no")
 	}
@@ -40,7 +35,7 @@ func setConfig() {
 		ScaleIncr:        0.02,
 	}
 
-	if err := storage.WriteMsgp(logs, lfs, &c, "/cfg.msgp"); err != nil {
+	if err := storage.WriteMsgp(logger, lfs, &c, "/cfg.msgp"); err != nil {
 		panic("no")
 	}
 }
