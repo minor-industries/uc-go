@@ -1,4 +1,4 @@
-//go:build rp2040
+//go:build pico
 
 package leds
 
@@ -28,7 +28,8 @@ func Setup() *pio.PIOStateMachine {
 	return sm
 }
 
-func Write(sm *pio.PIOStateMachine, pixels []color.RGBA) {
+func Write(driver any, pixels []color.RGBA) {
+	sm := driver.(*pio.PIOStateMachine)
 	const smTxFullMask = 0x1
 
 	for _, pixel := range pixels {

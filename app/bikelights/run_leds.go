@@ -1,5 +1,3 @@
-//go:build rp2040
-
 package bikelights
 
 import (
@@ -12,7 +10,6 @@ import (
 	"uc-go/pkg/leds/animations/bounce"
 	"uc-go/pkg/leds/animations/rainbow"
 	"uc-go/pkg/leds/strip"
-	"uc-go/pkg/pio"
 	util2 "uc-go/pkg/util"
 )
 
@@ -22,7 +19,7 @@ const (
 
 func runLeds(
 	config *util2.SyncConfig[cfg.Config],
-	sm *pio.PIOStateMachine,
+	driver any,
 ) {
 	pixels := make([]color.RGBA, 150)
 
@@ -76,7 +73,7 @@ func runLeds(
 		cb := animations[curCfg.CurrentAnimation]
 		t := float64(time.Now().UnixNano()) / 1e9
 		cb(t, tickDuration.Seconds())
-		writeColors(sm, curCfg.Scale, pixels, ledStrip)
+		writeColors(driver, curCfg.Scale, pixels, ledStrip)
 	}
 
 	ticker := time.NewTicker(tickDuration)
@@ -89,7 +86,7 @@ func runLeds(
 }
 
 func writeColors(
-	sm *pio.PIOStateMachine,
+	driver any,
 	scale float32,
 	pixels []color.RGBA,
 	st *strip.Strip,
@@ -105,5 +102,5 @@ func writeColors(
 		pixels[i].B = convert(led.B)
 	})
 
-	leds.Write(sm, pixels)
+	leds.Write(driver, pixels)
 }
