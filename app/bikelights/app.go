@@ -3,7 +3,6 @@ package bikelights
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"time"
 	"tinygo.org/x/drivers/irremote"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/app/bikelights/cfg"
@@ -30,7 +29,7 @@ func (a *App) ConfigFile() string {
 }
 
 func (a *App) Run() error {
-	<-time.After(5 * time.Second)
+	//<-time.After(5 * time.Second)
 	a.Logs.Log("Hello")
 
 	var err error
