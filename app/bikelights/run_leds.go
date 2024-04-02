@@ -9,7 +9,7 @@ import (
 	"uc-go/pkg/leds/animations/bounce"
 	"uc-go/pkg/leds/animations/rainbow"
 	"uc-go/pkg/leds/strip"
-	util2 "uc-go/pkg/util"
+	"uc-go/pkg/util"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 func runLeds(
-	config *util2.SyncConfig[cfg.Config],
+	config *util.SyncConfig[cfg.Config],
 	driver any,
 ) {
 	pixels := make([]color.RGBA, 150)
@@ -73,7 +73,7 @@ func writeColors(
 ) {
 	convert := func(x float32) uint8 {
 		val := x * scale
-		return uint8(util2.Clamp(0, val, 1.0) * ledMaxLevel * 255.0)
+		return uint8(util.Clamp(0, val, 1.0) * ledMaxLevel * 255.0)
 	}
 
 	st.Each(func(i int, led *strip.Led) {
