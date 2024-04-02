@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/minor-industries/uc-go/app/bikelights"
+	"github.com/minor-industries/uc-go/pkg/logger"
 	"github.com/pkg/errors"
-	"uc-go/app/bikelights"
-	"uc-go/pkg/logger"
 )
 
 func main() {

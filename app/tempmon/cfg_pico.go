@@ -3,8 +3,8 @@
 package tempmon
 
 import (
+	rfm69_board "github.com/minor-industries/uc-go/pkg/rfm69-board"
 	"machine"
-	rfm69_board "uc-go/pkg/rfm69-board"
 )
 
 var cfg = BoardCfg{

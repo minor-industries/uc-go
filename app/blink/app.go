@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/minor-industries/uc-go/pkg/blikenlights"
 	"github.com/pkg/errors"
 	"image/color"
 	"machine"
 	"time"
 	"tinygo.org/x/drivers/ws2812"
-	"uc-go/pkg/blikenlights"
 )
 
 func main() {

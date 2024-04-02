@@ -2,11 +2,11 @@ package setaddr
 
 import (
 	"fmt"
+	"github.com/minor-industries/uc-go/pkg/logger"
+	rfm69_board "github.com/minor-industries/uc-go/pkg/rfm69-board"
+	"github.com/minor-industries/uc-go/pkg/storage"
 	"github.com/pkg/errors"
 	"time"
-	"uc-go/pkg/logger"
-	rfm69_board "uc-go/pkg/rfm69-board"
-	"uc-go/pkg/storage"
 )
 
 const newAddr = 0xD0

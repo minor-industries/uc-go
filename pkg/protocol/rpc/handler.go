@@ -1,9 +1,9 @@
 package rpc
 
 import (
+	"github.com/minor-industries/uc-go/pkg/protocol/framing"
 	"github.com/pkg/errors"
 	"os"
-	"uc-go/pkg/protocol/framing"
 )
 
 type Handler interface {

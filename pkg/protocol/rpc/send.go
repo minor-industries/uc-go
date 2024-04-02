@@ -1,10 +1,10 @@
 package rpc
 
 import (
+	"github.com/minor-industries/uc-go/pkg/protocol/framing"
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
 	"io"
-	"uc-go/pkg/protocol/framing"
 )
 
 type Req struct {

@@ -1,15 +1,9 @@
-module uc-go
+module github.com/minor-industries/uc-go
 
 go 1.21.1
 
-replace github.com/minor-industries/theheads => ../heads
-
-replace github.com/minor-industries/rfm69 => ../minor-industries/rfm69
-
-replace github.com/minor-industries/max31856 => ../minor-industries/max31856
-
 require (
-	github.com/minor-industries/rfm69 v0.0.0-00010101000000-000000000000
+	github.com/minor-industries/rfm69 v0.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
 	github.com/tinylib/msgp v1.1.9

@@ -3,9 +3,9 @@
 package bbq
 
 import (
+	"github.com/minor-industries/uc-go/app/tempmon"
+	"github.com/minor-industries/uc-go/pkg/spi"
 	"machine"
-	"uc-go/app/tempmon"
-	"uc-go/pkg/spi"
 )
 
 var cfg = tempmon.BoardCfg{

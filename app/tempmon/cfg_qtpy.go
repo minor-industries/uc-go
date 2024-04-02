@@ -3,11 +3,11 @@
 package tempmon
 
 import (
+	rfm69_board "github.com/minor-industries/uc-go/pkg/rfm69-board"
+	"github.com/minor-industries/uc-go/pkg/spi"
 	"image/color"
 	"machine"
 	"tinygo.org/x/drivers/ws2812"
-	rfm69_board "uc-go/pkg/rfm69-board"
-	"uc-go/pkg/spi"
 )
 
 var cfg = BoardCfg{

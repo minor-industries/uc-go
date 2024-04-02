@@ -4,11 +4,11 @@ package leds
 
 import (
 	"device/sam"
+	"github.com/minor-industries/uc-go/pkg/neopixel-spi/driver"
+	"github.com/minor-industries/uc-go/pkg/neopixel-spi/driver/default_driver"
 	"github.com/pkg/errors"
 	"image/color"
 	"machine"
-	"uc-go/pkg/neopixel-spi/driver"
-	"uc-go/pkg/neopixel-spi/driver/default_driver"
 )
 
 var TxFullCounter int64 // TODO

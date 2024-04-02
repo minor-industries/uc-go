@@ -4,15 +4,15 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/minor-industries/rfm69"
+	"github.com/minor-industries/uc-go/pkg/blikenlights"
+	rfm69_board "github.com/minor-industries/uc-go/pkg/rfm69-board"
+	rfmCfg "github.com/minor-industries/uc-go/pkg/rfm69-board/cfg"
+	"github.com/minor-industries/uc-go/pkg/spi"
 	"github.com/pkg/errors"
 	"machine"
 	"strings"
 	"sync"
 	"time"
-	"uc-go/pkg/blikenlights"
-	rfm69_board "uc-go/pkg/rfm69-board"
-	rfmCfg "uc-go/pkg/rfm69-board/cfg"
-	"uc-go/pkg/spi"
 )
 
 type logger struct{}

@@ -1,9 +1,9 @@
 package rainbow
 
 import (
+	"github.com/minor-industries/uc-go/pkg/leds/strip"
+	"github.com/minor-industries/uc-go/pkg/noise/fixed"
 	"math"
-	"uc-go/pkg/leds/strip"
-	"uc-go/pkg/noise/fixed"
 )
 
 const (

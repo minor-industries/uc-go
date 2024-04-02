@@ -1,9 +1,9 @@
 package bikelights
 
 import (
-	"uc-go/app/bikelights/cfg"
-	"uc-go/pkg/logger"
-	"uc-go/pkg/storage"
+	"github.com/minor-industries/uc-go/app/bikelights/cfg"
+	"github.com/minor-industries/uc-go/pkg/logger"
+	"github.com/minor-industries/uc-go/pkg/storage"
 )
 
 func resetConfig(logger logger.Logger) {

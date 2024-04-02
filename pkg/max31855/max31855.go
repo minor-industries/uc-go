@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/minor-industries/uc-go/pkg/spi"
 	"github.com/pkg/errors"
-	"uc-go/pkg/spi"
 )
 
 type Thermocouple struct {

@@ -3,9 +3,9 @@ package main
 import (
 	"device/arm"
 	"device/sam"
+	"github.com/minor-industries/uc-go/pkg/blikenlights"
 	"machine"
 	"time"
-	"uc-go/pkg/blikenlights"
 )
 
 var state = false

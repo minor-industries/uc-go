@@ -4,10 +4,10 @@ package leds
 
 import (
 	"fmt"
+	"github.com/minor-industries/uc-go/pkg/pio"
 	"image/color"
 	"machine"
 	"sync/atomic"
-	"uc-go/pkg/pio"
 )
 
 func tightLoopContents() {}

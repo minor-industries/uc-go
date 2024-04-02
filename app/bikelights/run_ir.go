@@ -2,13 +2,13 @@ package bikelights
 
 import (
 	"fmt"
+	"github.com/minor-industries/uc-go/app/bikelights/cfg"
+	"github.com/minor-industries/uc-go/pkg/protocol/rpc"
+	"github.com/minor-industries/uc-go/pkg/storage"
+	"github.com/minor-industries/uc-go/pkg/util"
 	"github.com/pkg/errors"
 	"os"
 	"tinygo.org/x/drivers/irremote"
-	"uc-go/app/bikelights/cfg"
-	"uc-go/pkg/protocol/rpc"
-	"uc-go/pkg/storage"
-	"uc-go/pkg/util"
 )
 
 func (a *App) HandleIR(

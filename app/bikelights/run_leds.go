@@ -1,15 +1,15 @@
 package bikelights
 
 import (
+	"github.com/minor-industries/uc-go/app/bikelights/cfg"
+	"github.com/minor-industries/uc-go/pkg/leds"
+	"github.com/minor-industries/uc-go/pkg/leds/animations/bounce"
+	"github.com/minor-industries/uc-go/pkg/leds/animations/rainbow"
+	"github.com/minor-industries/uc-go/pkg/leds/strip"
+	"github.com/minor-industries/uc-go/pkg/util"
 	"image/color"
 	"sync/atomic"
 	"time"
-	"uc-go/app/bikelights/cfg"
-	"uc-go/pkg/leds"
-	"uc-go/pkg/leds/animations/bounce"
-	"uc-go/pkg/leds/animations/rainbow"
-	"uc-go/pkg/leds/strip"
-	"uc-go/pkg/util"
 )
 
 const (

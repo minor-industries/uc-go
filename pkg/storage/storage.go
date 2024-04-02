@@ -3,13 +3,13 @@ package storage
 import (
 	"bytes"
 	"fmt"
+	"github.com/minor-industries/uc-go/pkg/logger"
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
 	"io"
 	"machine"
 	"os"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/pkg/logger"
 )
 
 var (

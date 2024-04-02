@@ -2,15 +2,15 @@ package bikelights
 
 import (
 	"fmt"
+	"github.com/minor-industries/uc-go/app/bikelights/cfg"
+	"github.com/minor-industries/uc-go/pkg/ir"
+	"github.com/minor-industries/uc-go/pkg/leds"
+	"github.com/minor-industries/uc-go/pkg/logger"
+	"github.com/minor-industries/uc-go/pkg/storage"
+	"github.com/minor-industries/uc-go/pkg/util"
 	"github.com/pkg/errors"
 	"tinygo.org/x/drivers/irremote"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/app/bikelights/cfg"
-	"uc-go/pkg/ir"
-	"uc-go/pkg/leds"
-	"uc-go/pkg/logger"
-	"uc-go/pkg/storage"
-	"uc-go/pkg/util"
 )
 
 const (

@@ -1,9 +1,9 @@
 package bikelights
 
 import (
+	"github.com/minor-industries/uc-go/pkg/protocol/rpc"
 	"github.com/pkg/errors"
 	"os"
-	"uc-go/pkg/protocol/rpc"
 )
 
 func (a *App) Handlers() map[string]rpc.Handler {

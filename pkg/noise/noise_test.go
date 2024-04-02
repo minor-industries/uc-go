@@ -2,11 +2,11 @@ package noise
 
 import (
 	"fmt"
+	"github.com/minor-industries/uc-go/pkg/noise/f32"
+	"github.com/minor-industries/uc-go/pkg/noise/f32b"
+	"github.com/minor-industries/uc-go/pkg/noise/fixed"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"uc-go/pkg/noise/f32"
-	"uc-go/pkg/noise/f32b"
-	"uc-go/pkg/noise/fixed"
 )
 
 func TestNoise(t *testing.T) {

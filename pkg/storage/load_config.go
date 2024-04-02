@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"github.com/minor-industries/uc-go/pkg/logger"
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/pkg/logger"
 )
 
 type Serializer interface {

@@ -4,10 +4,10 @@
 package bbq
 
 import (
+	"github.com/minor-industries/uc-go/app/tempmon"
+	rfm69_board "github.com/minor-industries/uc-go/pkg/rfm69-board"
+	"github.com/minor-industries/uc-go/pkg/spi"
 	"machine"
-	"uc-go/app/tempmon"
-	rfm69_board "uc-go/pkg/rfm69-board"
-	"uc-go/pkg/spi"
 )
 
 var cfg = tempmon.BoardCfg{

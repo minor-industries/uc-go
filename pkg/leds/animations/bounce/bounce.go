@@ -1,8 +1,8 @@
 package bounce
 
 import (
+	"github.com/minor-industries/uc-go/pkg/leds/strip"
 	"math"
-	"uc-go/pkg/leds/strip"
 )
 
 type App struct {

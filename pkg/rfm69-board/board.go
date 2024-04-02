@@ -2,11 +2,11 @@ package rfm69_board
 
 import (
 	"fmt"
+	"github.com/minor-industries/uc-go/pkg/spi"
 	"github.com/pkg/errors"
 	"machine"
 	"sync/atomic"
 	"time"
-	"uc-go/pkg/spi"
 )
 
 type Board struct {

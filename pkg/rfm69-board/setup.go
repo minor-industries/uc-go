@@ -2,14 +2,14 @@ package rfm69_board
 
 import (
 	"github.com/minor-industries/rfm69"
+	"github.com/minor-industries/uc-go/pkg/logger"
+	"github.com/minor-industries/uc-go/pkg/rfm69-board/cfg"
+	"github.com/minor-industries/uc-go/pkg/spi"
+	"github.com/minor-industries/uc-go/pkg/storage"
+	"github.com/minor-industries/uc-go/pkg/util"
 	"github.com/pkg/errors"
 	"machine"
 	"tinygo.org/x/tinyfs/littlefs"
-	"uc-go/pkg/logger"
-	"uc-go/pkg/rfm69-board/cfg"
-	"uc-go/pkg/spi"
-	"uc-go/pkg/storage"
-	"uc-go/pkg/util"
 )
 
 type PinCfg struct {

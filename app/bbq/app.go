@@ -3,17 +3,17 @@ package bbq
 import (
 	"fmt"
 	"github.com/minor-industries/rfm69"
+	"github.com/minor-industries/uc-go/pkg/blikenlights"
+	"github.com/minor-industries/uc-go/pkg/logger"
+	"github.com/minor-industries/uc-go/pkg/max31855"
+	"github.com/minor-industries/uc-go/pkg/mcp9600"
+	rfm69_board "github.com/minor-industries/uc-go/pkg/rfm69-board"
+	"github.com/minor-industries/uc-go/pkg/schema"
+	"github.com/minor-industries/uc-go/pkg/spi"
 	"github.com/pkg/errors"
 	"machine"
 	"sync"
 	"time"
-	"uc-go/pkg/blikenlights"
-	"uc-go/pkg/logger"
-	"uc-go/pkg/max31855"
-	"uc-go/pkg/mcp9600"
-	rfm69_board "uc-go/pkg/rfm69-board"
-	"uc-go/pkg/schema"
-	"uc-go/pkg/spi"
 )
 
 const dstAddr = 2
