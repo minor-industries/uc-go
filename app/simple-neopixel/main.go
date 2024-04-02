@@ -17,7 +17,17 @@ func main() {
 	leds := ws2812.NewWS2812(ledPin)
 
 	t0 := time.Now()
-	buf := make([]color.RGBA, 150)
+	buf := []color.RGBA{
+		{
+			0, 0xFF, 0, 0,
+		},
+		{
+			0, 0, 0, 0,
+		},
+		{
+			0, 0xFF, 0, 0,
+		},
+	}
 
 	for t := range time.NewTicker(30 * time.Millisecond).C {
 		dt := t.Sub(t0).Seconds()
@@ -26,11 +36,11 @@ func main() {
 		v = 0x05
 		_ = v
 
-		for i := range buf {
-			buf[i].R = uint8(i)
-			buf[i].G = 0
-			buf[i].B = 0
-		}
+		//for i := range buf {
+		//	buf[i].R = uint8(i)
+		//	buf[i].G = 0
+		//	buf[i].B = 0
+		//}
 
 		leds.WriteColors(buf)
 	}

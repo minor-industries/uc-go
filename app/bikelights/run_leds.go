@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	ledMaxLevel = 0.05 // brightness level of NeoPxels (0~1)
+	ledMaxLevel = 0.5 // brightness level of NeoPxels (0~1)
 )
 
 func runLeds(
