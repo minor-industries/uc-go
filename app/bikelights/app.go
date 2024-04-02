@@ -3,6 +3,7 @@ package bikelights
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"time"
 	"tinygo.org/x/drivers/irremote"
 	"tinygo.org/x/tinyfs/littlefs"
 	"uc-go/app/bikelights/cfg"
@@ -29,6 +30,9 @@ func (a *App) ConfigFile() string {
 }
 
 func (a *App) Run() error {
+	<-time.After(2 * time.Second)
+	a.Logs.Log("Hello")
+
 	var err error
 
 	a.Lfs, err = storage.Setup(a.Logs)
@@ -62,7 +66,11 @@ func (a *App) Run() error {
 		irMsg,
 	)
 
-	sm := leds.Setup()
+	sm, err := leds.Setup(a.Cfg.SnapShot().NumLeds)
+	if err != nil {
+		return errors.Wrap(err, "setup leds")
+	}
+
 	go runLeds(a.Cfg, sm)
 
 	r := wifi.F(2, 3)
