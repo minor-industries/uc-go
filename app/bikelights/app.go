@@ -30,7 +30,7 @@ func (a *App) ConfigFile() string {
 }
 
 func (a *App) Run() error {
-	<-time.After(2 * time.Second)
+	<-time.After(5 * time.Second)
 	a.Logs.Log("Hello")
 
 	var err error
@@ -55,21 +55,31 @@ func (a *App) Run() error {
 		return errors.Wrap(err, "load config")
 	}
 
+	fmt.Println("here 1")
+
 	a.Cfg = util.NewSyncConfig(*config)
+
+	fmt.Println("here 2")
 
 	irMsg := make(chan irremote.Data, 10)
 	ir.Main(func(data irremote.Data) {
 		irMsg <- data
 	})
 
+	fmt.Println("here 3")
+
 	go a.HandleIR(
 		irMsg,
 	)
+
+	fmt.Println("here 4")
 
 	sm, err := leds.Setup(a.Cfg.SnapShot().NumLeds)
 	if err != nil {
 		return errors.Wrap(err, "setup leds")
 	}
+
+	fmt.Println("here 5")
 
 	go runLeds(a.Cfg, sm)
 

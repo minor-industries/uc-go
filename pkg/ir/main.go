@@ -9,8 +9,10 @@ import (
 //const powerPin = machine.GP18
 
 func Main(ch irremote.CommandHandler) {
-	powerPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	powerPin.Set(true)
+	if powerPin != machine.NoPin {
+		powerPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+		powerPin.Set(true)
+	}
 
 	ir := irremote.NewReceiver(pinIRIn)
 	ir.Configure()
