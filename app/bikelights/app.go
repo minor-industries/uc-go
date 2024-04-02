@@ -11,7 +11,6 @@ import (
 	"uc-go/pkg/logger"
 	"uc-go/pkg/storage"
 	"uc-go/pkg/util"
-	"uc-go/wifi"
 )
 
 const (
@@ -80,10 +79,7 @@ func (a *App) Run() error {
 
 	fmt.Println("here 5")
 
-	go runLeds(a.Cfg, sm)
+	runLeds(a.Cfg, sm)
 
-	r := wifi.F(2, 3)
-	a.Logs.Log(fmt.Sprintf("F(2,3) = %d", r))
-
-	select {}
+	return errors.New("unexpected exit")
 }

@@ -1,7 +1,6 @@
 package bikelights
 
 import (
-	"fmt"
 	"image/color"
 	"sync/atomic"
 	"time"
@@ -28,22 +27,6 @@ func runLeds(
 	tickDuration := 30 * time.Millisecond
 
 	count := uint32(0)
-	t0 := time.Now()
-
-	go func() {
-		for range time.NewTicker(time.Second).C {
-			count := atomic.LoadUint32(&count)
-			dt := time.Now().Sub(t0)
-			line := fmt.Sprintf(
-				"count = %d, t=%s, fps=%0.02f, txfull=%d",
-				count,
-				time.Now().String(),
-				float64(count)/dt.Seconds(),
-				atomic.LoadInt64(&leds.TxFullCounter),
-			)
-			_ = line //log(line)
-		}
-	}()
 
 	animations := map[string]func(t, dt float64){
 		"rainbow1": rainbow.Rainbow1(
@@ -77,11 +60,8 @@ func runLeds(
 	}
 
 	ticker := time.NewTicker(tickDuration)
-	for {
-		select {
-		case <-ticker.C:
-			f()
-		}
+	for range ticker.C {
+		f()
 	}
 }
 
