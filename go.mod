@@ -2,9 +2,13 @@ module github.com/minor-industries/uc-go
 
 go 1.21.1
 
-replace tinygo.org/x/drivers => github.com/minor-industries/drivers v0.0.0-20240403222057-a994655999c5
+replace (
+	github.com/minor-industries/neopixel-spi => ../neopixel-spi
+	tinygo.org/x/drivers => github.com/minor-industries/drivers v0.0.0-20240403222057-a994655999c5
+)
 
 require (
+	github.com/minor-industries/neopixel-spi v0.0.0-00010101000000-000000000000
 	github.com/minor-industries/rfm69 v0.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
