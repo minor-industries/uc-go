@@ -2,16 +2,12 @@ package main
 
 import (
 	"fmt"
-	"machine"
+	"github.com/minor-industries/uc-go/app/simple-ir/cfg"
 	"tinygo.org/x/drivers/irremote"
 )
 
-const irPin = machine.PA15
-
-//const irPin = machine.D5
-
 func main() {
-	ir := irremote.NewReceiver(irPin)
+	ir := irremote.NewReceiver(cfg.IrPin)
 	ir.Configure()
 
 	ch := make(chan irremote.Data, 10)
