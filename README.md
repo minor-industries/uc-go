@@ -6,9 +6,9 @@ A collection of tinygo/microcontroller sketches and prototypes.
 
 A small, low-cost controller for ws2812 LED strips.
 
-![bikeleds_board.jpg](https://minor-industries.sfo2.digitaloceanspaces.com/hw/bikeleds_board.jpg "bikeleds_board.jpg")
+![bikeleds_board.jpg](docs/bikeleds_board.jpg "bikeleds_board.jpg")
 
-![bikeleds_with_case.jpg](https://minor-industries.sfo2.digitaloceanspaces.com/hw/bikeleds_with_case.jpg "bikeleds_with_case.jpg")
+![bikeleds_with_case.jpg](docs/bikeleds_with_case.jpg "bikeleds_with_case.jpg")
 
 Features:
 
